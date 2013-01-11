@@ -1,0 +1,32 @@
+#!/usr/bin/python
+
+# Program for generating input file s for testing a program
+
+import random
+
+# m n
+m = random.randint(3, 50)
+n = random.randint(3, 50)
+print(m, n)
+
+# wallCost
+print(random.randint(0, m))
+
+# nBumpers
+nBumpers = random.randint(0, m * n)
+print(nBumpers)
+
+i = 0
+while i < nBumpers :
+    # bumperX, bumperY, value, cost
+    print(random.randint(0,m-1), random.randint(0,n-1), random.randint(0,1000), random.randint(0,1000))
+    i += 1
+
+# nBalls
+nBalls = random.randint(1, m * n)
+i = 0
+while i < nBumpers :
+    #ballX, ballY, direction, lifetime
+    print(random.randint(0,m-1), random.randint(0,n-1), random.randint(0,3), random.randint(0,1000))
+    i += 1
+
