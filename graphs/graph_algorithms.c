@@ -30,13 +30,16 @@
 
 typedef enum Bool {FALSE = 0, TRUE} Bool_t;
 
-const int k_maxDigits = 20;
+const int k_maxWeightDigits = 20;
 
-void printGraph(int** graph, int nVertices);
 int** newGraphMatrix(int nVertices);
-void deleteGraphMatrix(int** graph);
-void bfs(int** graph, int nVertices, int rootVertex);
-void dfs(int** graph, int nVertices, int rootVertex);
+void deleteGraphMatrix(int** const graph);
+void printGraph(int** const graph, int nVertices);
+
+void bfs(int** const graph, int nVertices, int rootVertex);
+void dfs(int** const graph, int nVertices, int rootVertex);
+void prim(int** const graph, int nVertices);
+void kruskal(int** const graph, int nVertices);
 
 
 int main(void) {
@@ -47,16 +50,16 @@ int main(void) {
 
     int i, j;
     int edgeWeight;
-    char edgeWeightStirng[k_maxDigits];
+    char edgeWeightString[k_maxWeightDigits];
     for (i = 0; i < nVertices; ++i) {
         j = 0;
         while (j < nVertices) {
             scanf("%s", edgeWeightString);
-            if (edgeWeightString[0] == 'i') {
+            if (edgeWeightString[0] == '*') {
                 edgeWeight = INT_MAX;
             }
             else {
-                sscanf(edgeWeigthString, "%d", &edgeWeight);
+                sscanf(edgeWeightString, "%d", &edgeWeight);
             }
             graph[i][j] = edgeWeight;
             ++j;
@@ -68,12 +71,17 @@ int main(void) {
 
     printf("\nBreadth-First Search: \n\n");
     int rootVertex;
-    scanf("%d", &rootVertex);
-    bfs(graph, nVertices, rootVertex);
+    for (rootVertex = 0; rootVertex < nVertices; ++rootVertex) {
+        bfs(graph, nVertices, rootVertex);
+    }
 
     printf("\nDepth-First Search: \n\n");
-    scanf("%d", &rootVertex);
-    dfs(graph, nVertices, rootVertex);
+    for (rootVertex = 0; rootVertex < nVertices; ++rootVertex) {
+        dfs(graph, nVertices, rootVertex);
+    }
+    
+    printf("\nMinimum Spanning Tree (Prim's algorithm):\n\n");
+    prim(graph, nVertices);
 
     deleteGraphMatrix(graph);
 
@@ -93,11 +101,11 @@ int** newGraphMatrix(int nVertices) {
     return graph;
 }
 
-void deleteGraphMatrix(int** graph) {
+void deleteGraphMatrix(int** const graph) {
     free(graph);
 }
 
-void printGraph(int** graph, int nVertices) {
+void printGraph(int** const graph, int nVertices) {
     int i,j;
 
     printf("    ");
@@ -125,7 +133,7 @@ void printGraph(int** graph, int nVertices) {
     }
 }
 
-void bfs(int** graph, int nVertices, int rootVertex) {
+void bfs(int** const graph, int nVertices, int rootVertex) {
     int* queue = (int*)malloc(sizeof(int) * nVertices);
     int front, back;
 
@@ -157,7 +165,7 @@ void bfs(int** graph, int nVertices, int rootVertex) {
     free(visitedFlags);
 }
 
-void dfs(int** graph, int nVertices, int rootVertex) {
+void dfs(int** const graph, int nVertices, int rootVertex) {
     int* stack = (int*)malloc(sizeof(int) * nVertices);
     int top;
 
@@ -192,4 +200,52 @@ void dfs(int** graph, int nVertices, int rootVertex) {
 
     free(stack);
     free(visitedFlags);
+}
+
+void prim(int** const graph, int nVertices) {
+    Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
+    Bool_t* openVerticesFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
+    int i, j;
+    for (i = 0; i < nVertices; ++i) {
+        visitedFlags[i] = FALSE;
+        openVerticesFlags[i] = FALSE;
+    }
+    
+    int visitedVertices = 0;
+    
+    visitedFlags[0] = TRUE;
+    openVerticesFlags[0] = TRUE;
+    ++visitedVertices;
+    int minEdge = INT_MAX;
+    int minEdgeOrigin = 0, minEdgeDestiny = 0;
+    Bool_t isPossibleEdgeFound = TRUE;
+    while (isPossibleEdgeFound && visitedVertices < nVertices) {
+        isPossibleEdgeFound = FALSE;
+        minEdge = INT_MAX;
+        for (i = 0; i < nVertices; ++i) {
+            if (openVerticesFlags[i] == TRUE) {
+                for (j = 0; j < nVertices; ++j) {
+                    if (graph[i][j] != INT_MAX && visitedFlags[j] == FALSE) {
+                        isPossibleEdgeFound = TRUE;
+                        if (graph[i][j] < minEdge) {
+                            minEdge = graph[i][j];
+                            minEdgeOrigin = i;
+                            minEdgeDestiny = j;
+                        }
+                    }
+                }
+                if (!isPossibleEdgeFound) {
+                    openVerticesFlags[i] = FALSE;
+                }
+            }
+        }
+        if (isPossibleEdgeFound) {
+            openVerticesFlags[minEdgeDestiny] = TRUE;
+            visitedFlags[minEdgeDestiny] = TRUE;
+            printf("%d-%d, %d\n", minEdgeOrigin, minEdgeDestiny, minEdge);
+        }
+    }
+
+    free(visitedFlags);
+    free(openVerticesFlags);
 }
