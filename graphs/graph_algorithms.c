@@ -31,6 +31,12 @@
 
 typedef enum Bool {FALSE = 0, TRUE} Bool_t;
 
+typedef struct edge {
+    int weight;
+    int origin;
+    int destiny;
+} Edge_t;
+
 const int k_maxWeightDigits = 20;
 
 int** newGraphMatrix(int nVertices);
@@ -221,21 +227,20 @@ void prim(int** const graph, int nVertices) {
     ++visitedVertices;
 
     int i, j;
-    int minEdge = INT_MAX;
-    int minEdgeOrigin = 0, minEdgeDestiny = 0;
+    Edge_t minEdge;
     Bool_t isPossibleEdgeFound = TRUE;
     while (isPossibleEdgeFound && visitedVertices < nVertices) {
         isPossibleEdgeFound = FALSE;
-        minEdge = INT_MAX;
+        minEdge.weight = INT_MAX;
         for (i = 0; i < nVertices; ++i) {
             if (openVerticesFlags[i] == TRUE) {
                 for (j = 0; j < nVertices; ++j) {
                     if (graph[i][j] != INT_MAX && visitedFlags[j] == FALSE) {
                         isPossibleEdgeFound = TRUE;
-                        if (graph[i][j] < minEdge) {
-                            minEdge = graph[i][j];
-                            minEdgeOrigin = i;
-                            minEdgeDestiny = j;
+                        if (graph[i][j] < minEdge.weight) {
+                            minEdge.weight = graph[i][j];
+                            minEdge.origin = i;
+                            minEdge.destiny = j;
                         }
                     }
                 }
@@ -245,9 +250,9 @@ void prim(int** const graph, int nVertices) {
             }
         }
         if (isPossibleEdgeFound) {
-            openVerticesFlags[minEdgeDestiny] = TRUE;
-            visitedFlags[minEdgeDestiny] = TRUE;
-            printf("%d-%d, %d\n", minEdgeOrigin, minEdgeDestiny, minEdge);
+            openVerticesFlags[minEdge.destiny] = TRUE;
+            visitedFlags[minEdge.destiny] = TRUE;
+            printf("%d-%d, %d\n", minEdge.origin, minEdge.destiny, minEdge.weight);
         }
     }
 
@@ -256,44 +261,40 @@ void prim(int** const graph, int nVertices) {
 }
 
 int compareEdges(const void* edge1, const void* edge2) {
-    return *(int*)edge1 - *(int*)edge2;
+    return ((Edge_t*)edge1)->weight - ((Edge_t*)edge2)->weight;
 }
 
 void kruskal(int** const graph, int nVertices) {
     int maxEdges = nVertices * (nVertices - 1) / 2;
-    int** edges = (int**)malloc(sizeof(int*) * maxEdges);
-    
+    Edge_t* edges = (Edge_t*)malloc(sizeof(Edge_t) * maxEdges);
+
     int i, j;
     int edgeNo = 0;
     for (i = 0; i < nVertices; ++i) {
         for (j = 0; j < nVertices; ++j) {
             if (graph[i][j] != INT_MAX) {
-                edges[edgeNo] = (int*)malloc(sizeof(int) * 3);
-                edges[edgeNo][0] = graph[i][j];
-                edges[edgeNo][1] = i;
-                edges[edgeNo][2] = j;
+                edges[edgeNo].weight = graph[i][j];
+                edges[edgeNo].origin = i;
+                edges[edgeNo].destiny = j;
                 ++edgeNo;
             }
         }
     }
-    int nEdges = edgeNo + 1;
+    int nEdges = edgeNo;
 
-    qsort(edges, nEdges, sizeof(int) * 3, compareEdges);
+    qsort(edges, nEdges, sizeof(Edge_t), compareEdges);
 
     Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
     memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
 
     for (i = 0; i < nEdges; ++i) {
-        if (visitedFlags[edges[i][2]] == FALSE) {
-            visitedFlags[edges[i][1]] = TRUE;
-            visitedFlags[edges[i][2]] = TRUE;
-            printf("%d-%d, %d\n", edges[i][1], edges[i][2], edges[i][0]);
+        if (visitedFlags[edges[i].destiny] == FALSE) {
+            visitedFlags[edges[i].origin] = TRUE;
+            visitedFlags[edges[i].destiny] = TRUE;
+            printf("%d-%d, %d\n", edges[i].origin, edges[i].destiny, edges[i].weight);
         }
     }
 
-    for (i = 0; i < nEdges; ++i) {
-        free(edges[i]);
-    }
     free(edges);
     free(visitedFlags);
 }
