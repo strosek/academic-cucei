@@ -1,4 +1,4 @@
- /*
+/*
  *  Copyright (c) 2013 Erick Daniel Corona <edcoronag@gmail.com>
  *
  *  Permission is hereby granted, free of charge, to any person
@@ -27,13 +27,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
 
 typedef enum Bool {FALSE = 0, TRUE} Bool_t;
 
 const int k_maxWeightDigits = 20;
 
 int** newGraphMatrix(int nVertices);
-void deleteGraphMatrix(int** const graph);
+void deleteGraphMatrix(int** const graph, int nVertices);
 void printGraph(int** const graph, int nVertices);
 
 void bfs(int** const graph, int nVertices, int rootVertex);
@@ -41,6 +42,7 @@ void dfs(int** const graph, int nVertices, int rootVertex);
 void prim(int** const graph, int nVertices);
 void kruskal(int** const graph, int nVertices);
 
+int compareEdges(const void* edge1, const void* edge2);
 
 int main(void) {
     int nVertices;
@@ -83,7 +85,10 @@ int main(void) {
     printf("\nMinimum Spanning Tree (Prim's algorithm):\n\n");
     prim(graph, nVertices);
 
-    deleteGraphMatrix(graph);
+    printf("\nMinimum Spanning Tree/Forest (Kruskal's algorithm):\n\n");
+    kruskal(graph, nVertices);
+
+    deleteGraphMatrix(graph, nVertices);
 
     return EXIT_SUCCESS;
 }
@@ -101,7 +106,11 @@ int** newGraphMatrix(int nVertices) {
     return graph;
 }
 
-void deleteGraphMatrix(int** const graph) {
+void deleteGraphMatrix(int** const graph, int nVertices) {
+    int i;
+    for (i = 0; i < nVertices; ++i) {
+        free(graph[i]);
+    }
     free(graph);
 }
 
@@ -138,16 +147,14 @@ void bfs(int** const graph, int nVertices, int rootVertex) {
     int front, back;
 
     Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
-    int i;
-    for (i = 0; i < nVertices; ++i) {
-        visitedFlags[i] = FALSE;
-    }
+    memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
 
     front = back = 0;
     queue[back] = rootVertex;
     visitedFlags[rootVertex] = TRUE;
     printf("%d ", rootVertex);
 
+    int i;
     while (front <= back) {
         for (i = 0; i < nVertices; ++i) {
             if (graph[queue[front]][i] != INT_MAX && visitedFlags[i] == FALSE) {
@@ -171,9 +178,7 @@ void dfs(int** const graph, int nVertices, int rootVertex) {
 
     Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
     int i;
-    for (i = 0; i < nVertices; ++i) {
-        visitedFlags[i] = FALSE;
-    }
+    memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
 
     top = 0;
     stack[top] = rootVertex;
@@ -205,17 +210,17 @@ void dfs(int** const graph, int nVertices, int rootVertex) {
 void prim(int** const graph, int nVertices) {
     Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
     Bool_t* openVerticesFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
-    int i, j;
-    for (i = 0; i < nVertices; ++i) {
-        visitedFlags[i] = FALSE;
-        openVerticesFlags[i] = FALSE;
-    }
+
+    memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
+    memset(openVerticesFlags, FALSE, sizeof(Bool_t) * nVertices);
     
     int visitedVertices = 0;
     
     visitedFlags[0] = TRUE;
     openVerticesFlags[0] = TRUE;
     ++visitedVertices;
+
+    int i, j;
     int minEdge = INT_MAX;
     int minEdgeOrigin = 0, minEdgeDestiny = 0;
     Bool_t isPossibleEdgeFound = TRUE;
@@ -248,4 +253,47 @@ void prim(int** const graph, int nVertices) {
 
     free(visitedFlags);
     free(openVerticesFlags);
+}
+
+int compareEdges(const void* edge1, const void* edge2) {
+    return *(int*)edge1 - *(int*)edge2;
+}
+
+void kruskal(int** const graph, int nVertices) {
+    int maxEdges = nVertices * (nVertices - 1) / 2;
+    int** edges = (int**)malloc(sizeof(int*) * maxEdges);
+    
+    int i, j;
+    int edgeNo = 0;
+    for (i = 0; i < nVertices; ++i) {
+        for (j = 0; j < nVertices; ++j) {
+            if (graph[i][j] != INT_MAX) {
+                edges[edgeNo] = (int*)malloc(sizeof(int) * 3);
+                edges[edgeNo][0] = graph[i][j];
+                edges[edgeNo][1] = i;
+                edges[edgeNo][2] = j;
+                ++edgeNo;
+            }
+        }
+    }
+    int nEdges = edgeNo + 1;
+
+    qsort(edges, nEdges, sizeof(int) * 3, compareEdges);
+
+    Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
+    memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
+
+    for (i = 0; i < nEdges; ++i) {
+        if (visitedFlags[edges[i][2]] == FALSE) {
+            visitedFlags[edges[i][1]] = TRUE;
+            visitedFlags[edges[i][2]] = TRUE;
+            printf("%d-%d, %d\n", edges[i][1], edges[i][2], edges[i][0]);
+        }
+    }
+
+    for (i = 0; i < nEdges; ++i) {
+        free(edges[i]);
+    }
+    free(edges);
+    free(visitedFlags);
 }
