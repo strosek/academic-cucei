@@ -47,6 +47,7 @@ void bfs(int** const graph, int nVertices, int rootVertex);
 void dfs(int** const graph, int nVertices, int rootVertex);
 void prim(int** const graph, int nVertices);
 void kruskal(int** const graph, int nVertices);
+void dijkstra(int** const graph, int nVertices, int initialVertex);
 
 int compareEdges(const void* edge1, const void* edge2);
 
@@ -94,16 +95,19 @@ int main(void) {
     printf("\nMinimum Spanning Tree/Forest (Kruskal's algorithm):\n\n");
     kruskal(graph, nVertices);
 
+    printf("\nShortest paths from an edge (Dijkstra's algorithm):\n\n");
+    dijkstra(graph, nVertices, 0);
+
     deleteGraphMatrix(graph, nVertices);
 
     return EXIT_SUCCESS;
 }
 
 int** newGraphMatrix(int nVertices) {
-    int** graph = (int**)malloc(sizeof(int*) * nVertices);
+    int** graph = (int**)calloc(nVertices, sizeof(int*));
     int i, j;
     for (i = 0; i < nVertices; ++i) {
-        graph[i] = (int*)malloc(sizeof(int) * nVertices);
+        graph[i] = (int*)calloc(nVertices, sizeof(int));
         for (j = 0; j < nVertices; ++j) {
             graph[i][j] = INT_MAX;
         }
@@ -149,10 +153,10 @@ void printGraph(int** const graph, int nVertices) {
 }
 
 void bfs(int** const graph, int nVertices, int rootVertex) {
-    int* queue = (int*)malloc(sizeof(int) * nVertices);
+    int* queue = (int*)calloc(nVertices, sizeof(int));
     int front, back;
 
-    Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
+    Bool_t* visitedFlags = (Bool_t*)calloc(nVertices, sizeof(Bool_t));
     memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
 
     front = back = 0;
@@ -179,10 +183,10 @@ void bfs(int** const graph, int nVertices, int rootVertex) {
 }
 
 void dfs(int** const graph, int nVertices, int rootVertex) {
-    int* stack = (int*)malloc(sizeof(int) * nVertices);
+    int* stack = (int*)calloc(nVertices, sizeof(int));
     int top;
 
-    Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
+    Bool_t* visitedFlags = (Bool_t*)calloc(nVertices, sizeof(Bool_t));
     int i;
     memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
 
@@ -214,8 +218,8 @@ void dfs(int** const graph, int nVertices, int rootVertex) {
 }
 
 void prim(int** const graph, int nVertices) {
-    Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
-    Bool_t* openVerticesFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
+    Bool_t* visitedFlags = (Bool_t*)calloc(nVertices, sizeof(Bool_t));
+    Bool_t* openVerticesFlags = (Bool_t*)calloc(nVertices, sizeof(Bool_t));
 
     memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
     memset(openVerticesFlags, FALSE, sizeof(Bool_t) * nVertices);
@@ -266,7 +270,7 @@ int compareEdges(const void* edge1, const void* edge2) {
 
 void kruskal(int** const graph, int nVertices) {
     int maxEdges = nVertices * (nVertices - 1) / 2;
-    Edge_t* edges = (Edge_t*)malloc(sizeof(Edge_t) * maxEdges);
+    Edge_t* edges = (Edge_t*)calloc(maxEdges, sizeof(Edge_t));
 
     int i, j;
     int edgeNo = 0;
@@ -284,7 +288,7 @@ void kruskal(int** const graph, int nVertices) {
 
     qsort(edges, nEdges, sizeof(Edge_t), compareEdges);
 
-    Bool_t* visitedFlags = (Bool_t*)malloc(sizeof(Bool_t) * nVertices);
+    Bool_t* visitedFlags = (Bool_t*)calloc(nVertices, sizeof(Bool_t));
     memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
 
     for (i = 0; i < nEdges; ++i) {
@@ -295,6 +299,57 @@ void kruskal(int** const graph, int nVertices) {
         }
     }
 
-    free(edges);
-    free(visitedFlags);
+//     free(visitedFlags);
+//     free(edges);
+}
+
+void dijkstra(int** const graph, int nVertices, int initialVertex) {
+    int* distances = (int*)calloc(nVertices, sizeof(int));
+    int* previousVertices = (int*)calloc(nVertices, sizeof(int));
+    int* queue = (int*)calloc(nVertices, sizeof(int));
+    Bool_t* visitedFlags = (Bool_t*)calloc(nVertices, sizeof(Bool_t));
+    memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
+
+    int i;
+    for (i = 0; i < nVertices; ++i) {
+        distances[i] = INT_MAX;
+    }
+    
+
+    int front, back;
+
+    front = back = 0;
+    queue[back] = initialVertex;
+    previousVertices[initialVertex] = initialVertex;
+    distances[initialVertex] = 0;
+
+    int currentVertex = initialVertex;
+    int distance;
+    while (front <= back) {
+        for (i = 0; i < nVertices; ++i) {
+            currentVertex = queue[front];
+            if (graph[currentVertex][i] != INT_MAX && visitedFlags[i] == FALSE) {
+                ++back;
+                queue[back] = i;
+                distance = graph[currentVertex][i] + distances[currentVertex];
+                if (distance < distances[i]) {
+                    distances[i] = graph[currentVertex][i] + distances[currentVertex];
+                    previousVertices[i] = currentVertex;
+                }
+            }
+        }
+        visitedFlags[currentVertex] = TRUE;
+        ++front;
+    }
+
+    printf("  V Dist Prev\n");
+    printf("--- ---- ----\n");
+    for (i = 0; i < nVertices; ++i) {
+        printf("%3d%5d%5d\n", i, distances[i], previousVertices[i]);
+    }
+
+//     free(visitedFlags);
+//     free(queue);
+//     free(previousVertices);
+//     free(distances);
 }
