@@ -33,11 +33,12 @@ typedef enum Bool {FALSE = 0, TRUE} Bool_t;
 
 typedef struct edge {
     int weight;
-    int origin;
-    int destiny;
+    int source;
+    int destination;
 } Edge_t;
 
-const int k_maxWeightDigits = 20;
+const int MAX_WEIGHT_DIGITS = 20;
+const int INFINITY = INT_MAX;
 
 int** newGraphMatrix(int nVertices);
 void deleteGraphMatrix(int** const graph, int nVertices);
@@ -48,6 +49,7 @@ void dfs(int** const graph, int nVertices, int rootVertex);
 void prim(int** const graph, int nVertices);
 void kruskal(int** const graph, int nVertices);
 void dijkstra(int** const graph, int nVertices, int initialVertex);
+void bellman_ford(int** const graph, int nVertices, int initialVertex);
 
 int compareEdges(const void* edge1, const void* edge2);
 
@@ -59,13 +61,13 @@ int main(void) {
 
     int i, j;
     int edgeWeight;
-    char edgeWeightString[k_maxWeightDigits];
+    char edgeWeightString[MAX_WEIGHT_DIGITS];
     for (i = 0; i < nVertices; ++i) {
         j = 0;
         while (j < nVertices) {
             scanf("%s", edgeWeightString);
             if (edgeWeightString[0] == '*') {
-                edgeWeight = INT_MAX;
+                edgeWeight = INFINITY;
             }
             else {
                 sscanf(edgeWeightString, "%d", &edgeWeight);
@@ -98,6 +100,9 @@ int main(void) {
     printf("\nShortest paths from an edge (Dijkstra's algorithm):\n\n");
     dijkstra(graph, nVertices, 0);
 
+    printf("\nShortest paths from an edge (Bellman-Ford algorithm):\n\n");
+    bellman_ford(graph, nVertices, 0);
+
     deleteGraphMatrix(graph, nVertices);
 
     return EXIT_SUCCESS;
@@ -109,7 +114,7 @@ int** newGraphMatrix(int nVertices) {
     for (i = 0; i < nVertices; ++i) {
         graph[i] = (int*)calloc(nVertices, sizeof(int));
         for (j = 0; j < nVertices; ++j) {
-            graph[i][j] = INT_MAX;
+            graph[i][j] = INFINITY;
         }
     }
 
@@ -141,7 +146,7 @@ void printGraph(int** const graph, int nVertices) {
     for (i = 0; i < nVertices; ++i) {
         printf("%3d:", i);
         for (j = 0; j < nVertices; ++j) {
-            if (graph[i][j] != INT_MAX) {
+            if (graph[i][j] != INFINITY) {
                 printf("%3d", graph[i][j]);
             }
             else {
@@ -167,7 +172,7 @@ void bfs(int** const graph, int nVertices, int rootVertex) {
     int i;
     while (front <= back) {
         for (i = 0; i < nVertices; ++i) {
-            if (graph[queue[front]][i] != INT_MAX && visitedFlags[i] == FALSE) {
+            if (graph[queue[front]][i] != INFINITY && visitedFlags[i] == FALSE) {
                 ++back;
                 queue[back] = i;
                 visitedFlags[i] = TRUE;
@@ -199,7 +204,7 @@ void dfs(int** const graph, int nVertices, int rootVertex) {
     while (top >= 0) {
         isChildFound = FALSE;
         for (i = 0; i < nVertices && !isChildFound; ++i) {
-            if (graph[stack[top]][i] != INT_MAX && visitedFlags[i] == FALSE) {
+            if (graph[stack[top]][i] != INFINITY && visitedFlags[i] == FALSE) {
                 ++top;
                 stack[top] = i;
                 isChildFound = TRUE;
@@ -235,16 +240,16 @@ void prim(int** const graph, int nVertices) {
     Bool_t isPossibleEdgeFound = TRUE;
     while (isPossibleEdgeFound && visitedVertices < nVertices) {
         isPossibleEdgeFound = FALSE;
-        minEdge.weight = INT_MAX;
+        minEdge.weight = INFINITY;
         for (i = 0; i < nVertices; ++i) {
             if (openVerticesFlags[i] == TRUE) {
                 for (j = 0; j < nVertices; ++j) {
-                    if (graph[i][j] != INT_MAX && visitedFlags[j] == FALSE) {
+                    if (graph[i][j] != INFINITY && visitedFlags[j] == FALSE) {
                         isPossibleEdgeFound = TRUE;
                         if (graph[i][j] < minEdge.weight) {
                             minEdge.weight = graph[i][j];
-                            minEdge.origin = i;
-                            minEdge.destiny = j;
+                            minEdge.source = i;
+                            minEdge.destination = j;
                         }
                     }
                 }
@@ -254,9 +259,9 @@ void prim(int** const graph, int nVertices) {
             }
         }
         if (isPossibleEdgeFound) {
-            openVerticesFlags[minEdge.destiny] = TRUE;
-            visitedFlags[minEdge.destiny] = TRUE;
-            printf("%d-%d, %d\n", minEdge.origin, minEdge.destiny, minEdge.weight);
+            openVerticesFlags[minEdge.destination] = TRUE;
+            visitedFlags[minEdge.destination] = TRUE;
+            printf("%d-%d, %d\n", minEdge.source, minEdge.destination, minEdge.weight);
         }
     }
 
@@ -269,17 +274,17 @@ int compareEdges(const void* edge1, const void* edge2) {
 }
 
 void kruskal(int** const graph, int nVertices) {
-    int maxEdges = nVertices * (nVertices - 1) / 2;
+    const int maxEdges = nVertices * (nVertices - 1) / 2;
     Edge_t* const edges = (Edge_t*)calloc(maxEdges, sizeof(Edge_t));
 
     int i, j;
     int edgeNo = 0;
     for (i = 0; i < nVertices; ++i) {
         for (j = 0; j < nVertices; ++j) {
-            if (graph[i][j] != INT_MAX) {
+            if (graph[i][j] != INFINITY) {
                 edges[edgeNo].weight = graph[i][j];
-                edges[edgeNo].origin = i;
-                edges[edgeNo].destiny = j;
+                edges[edgeNo].source = i;
+                edges[edgeNo].destination = j;
                 ++edgeNo;
             }
         }
@@ -292,15 +297,15 @@ void kruskal(int** const graph, int nVertices) {
     memset(visitedFlags, FALSE, sizeof(Bool_t) * nVertices);
 
     for (i = 0; i < nEdges; ++i) {
-        if (visitedFlags[edges[i].destiny] == FALSE) {
-            visitedFlags[edges[i].origin] = TRUE;
-            visitedFlags[edges[i].destiny] = TRUE;
-            printf("%d-%d, %d\n", edges[i].origin, edges[i].destiny, edges[i].weight);
+        if (visitedFlags[edges[i].destination] == FALSE) {
+            visitedFlags[edges[i].source] = TRUE;
+            visitedFlags[edges[i].destination] = TRUE;
+            printf("%d-%d, %d\n", edges[i].source, edges[i].destination, edges[i].weight);
         }
     }
 
-    free(visitedFlags);
-    free(edges);
+//     free(visitedFlags);
+//     free(edges);
 }
 
 void dijkstra(int** const graph, int nVertices, int initialVertex) {
@@ -312,7 +317,7 @@ void dijkstra(int** const graph, int nVertices, int initialVertex) {
 
     int i;
     for (i = 0; i < nVertices; ++i) {
-        distances[i] = INT_MAX;
+        distances[i] = INFINITY;
     }
     
 
@@ -328,7 +333,7 @@ void dijkstra(int** const graph, int nVertices, int initialVertex) {
     while (front <= back) {
         for (i = 0; i < nVertices; ++i) {
             currentVertex = queue[front];
-            if (graph[currentVertex][i] != INT_MAX && visitedFlags[i] == FALSE) {
+            if (graph[currentVertex][i] != INFINITY && visitedFlags[i] == FALSE) {
                 ++back;
                 queue[back] = i;
                 distance = graph[currentVertex][i] + distances[currentVertex];
@@ -348,8 +353,67 @@ void dijkstra(int** const graph, int nVertices, int initialVertex) {
         printf("%3d%5d%5d\n", i, distances[i], previousVertices[i]);
     }
 
-    free(visitedFlags);
-    free(queue);
-    free(previousVertices);
-    free(distances);
+//     free(visitedFlags);
+//     free(queue);
+//     free(previousVertices);
+//     free(distances);
+}
+
+void bellman_ford(int** const graph, int nVertices, int initialVertex) {
+    int* const distances = (int*)calloc(nVertices, sizeof(int));
+    int* const previousVertices = (int*)calloc(nVertices, sizeof(int));
+    const int maxEdges = nVertices * (nVertices - 1) / 2;
+    Edge_t* const edges = (Edge_t*)calloc(maxEdges, sizeof(Edge_t));
+
+    int i, j;
+    for (i = 0; i < nVertices; ++i) {
+        distances[i] = INFINITY;
+    }
+
+    distances[initialVertex] = 0;
+    previousVertices[initialVertex] = initialVertex;
+    
+    int edgeNo = 0;
+    for (i = 0; i < nVertices; ++i) {
+        for (j = 0; j < nVertices; ++j) {
+            if (graph[i][j] != INFINITY) {
+                edges[edgeNo].weight = graph[i][j];
+                edges[edgeNo].source = i;
+                edges[edgeNo].destination = j;
+                if (distances[edges[edgeNo].source] != INFINITY) {
+                    if (distances[edges[edgeNo].source] + edges[edgeNo].weight <
+                            distances[edges[edgeNo].destination]) {
+                        distances[edges[edgeNo].destination] = distances[edges[edgeNo].source] +
+                                edges[edgeNo].weight;
+                        previousVertices[edges[edgeNo].destination] = edges[edgeNo].source;
+                    }
+                }
+                ++edgeNo;
+            }
+        }
+    }
+    const int nEdges = edgeNo;
+
+    Bool_t isNegativeCycleFound = FALSE;
+    for (edgeNo = 0; edgeNo < nEdges && !isNegativeCycleFound; ++edgeNo) {
+        if (distances[edges[edgeNo].source] + edges[edgeNo].weight <
+                            distances[edges[edgeNo].destination]) {
+            isNegativeCycleFound = TRUE;
+        }
+    }
+
+    if (isNegativeCycleFound) {
+        fprintf(stderr, "bellman_ford: negative-weight cycle found\n");
+    }
+    else {
+        printf("  V Dist Prev\n");
+        printf("--- ---- ----\n");
+        for (i = 0; i < nVertices; ++i) {
+            printf("%3d%5d%5d\n", i, distances[i], previousVertices[i]);
+        }
+    }
+
+//     free(edges);
+//     free(previousVertices);
+//     free(distances);
 }
