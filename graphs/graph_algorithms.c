@@ -50,8 +50,10 @@ void prim(int** const graph, int nVertices);
 void kruskal(int** const graph, int nVertices);
 void dijkstra(int** const graph, int nVertices, int initialVertex);
 void bellman_ford(int** const graph, int nVertices, int initialVertex);
+void floyd_warshall(int** const graph, int nVertices);
 
 int compareEdges(const void* edge1, const void* edge2);
+
 
 int main(void) {
     int nVertices;
@@ -103,10 +105,14 @@ int main(void) {
     printf("\nShortest paths from an edge (Bellman-Ford algorithm):\n\n");
     bellman_ford(graph, nVertices, 0);
 
+    printf("\nShortest paths between all edges (Floyd-Warshall algorithm):\n\n");
+    floyd_warshall(graph, nVertices);
+
     deleteGraphMatrix(graph, nVertices);
 
     return EXIT_SUCCESS;
 }
+
 
 int** newGraphMatrix(int nVertices) {
     int** const graph = (int**)calloc(nVertices, sizeof(int*));
@@ -121,6 +127,7 @@ int** newGraphMatrix(int nVertices) {
     return graph;
 }
 
+
 void deleteGraphMatrix(int** const graph, int nVertices) {
     int i;
     for (i = 0; i < nVertices; ++i) {
@@ -129,10 +136,11 @@ void deleteGraphMatrix(int** const graph, int nVertices) {
     free(graph);
 }
 
+
 void printGraph(int** const graph, int nVertices) {
     int i,j;
 
-    printf("    ");
+    printf("%4c", ' ');
     for (i = 0; i < nVertices; ++i) {
         printf("%3d", i);
     }
@@ -146,16 +154,15 @@ void printGraph(int** const graph, int nVertices) {
     for (i = 0; i < nVertices; ++i) {
         printf("%3d:", i);
         for (j = 0; j < nVertices; ++j) {
-            if (graph[i][j] != INFINITY) {
+            if (graph[i][j] != INFINITY)
                 printf("%3d", graph[i][j]);
-            }
-            else {
+            else
                 printf("%3c", ' ');
-            }
         }
         printf("\n");
     }
 }
+
 
 void bfs(int** const graph, int nVertices, int rootVertex) {
     int* const queue = (int*)calloc(nVertices, sizeof(int));
@@ -186,6 +193,7 @@ void bfs(int** const graph, int nVertices, int rootVertex) {
     free(queue);
     free(visitedFlags);
 }
+
 
 void dfs(int** const graph, int nVertices, int rootVertex) {
     int* const stack = (int*)calloc(nVertices, sizeof(int));
@@ -221,6 +229,7 @@ void dfs(int** const graph, int nVertices, int rootVertex) {
     free(stack);
     free(visitedFlags);
 }
+
 
 void prim(int** const graph, int nVertices) {
     Bool_t* const visitedFlags = (Bool_t*)calloc(nVertices, sizeof(Bool_t));
@@ -269,9 +278,11 @@ void prim(int** const graph, int nVertices) {
     free(openVerticesFlags);
 }
 
+
 int compareEdges(const void* edge1, const void* edge2) {
     return ((Edge_t*)edge1)->weight - ((Edge_t*)edge2)->weight;
 }
+
 
 void kruskal(int** const graph, int nVertices) {
     const int maxEdges = nVertices * (nVertices - 1) / 2;
@@ -307,6 +318,7 @@ void kruskal(int** const graph, int nVertices) {
 //     free(visitedFlags);
 //     free(edges);
 }
+
 
 void dijkstra(int** const graph, int nVertices, int initialVertex) {
     int* const distances = (int*)calloc(nVertices, sizeof(int));
@@ -358,6 +370,7 @@ void dijkstra(int** const graph, int nVertices, int initialVertex) {
 //     free(previousVertices);
 //     free(distances);
 }
+
 
 void bellman_ford(int** const graph, int nVertices, int initialVertex) {
     int* const distances = (int*)calloc(nVertices, sizeof(int));
@@ -417,3 +430,39 @@ void bellman_ford(int** const graph, int nVertices, int initialVertex) {
 //     free(previousVertices);
 //     free(distances);
 }
+
+
+void floyd_warshall(int ** const graph, int nVertices) {
+    int** const distances = (int**)calloc(nVertices, sizeof(int*));
+    int i, j, k;
+    for (i = 0; i < nVertices; ++i)
+        distances[i] = (int*)calloc(nVertices, sizeof(int));
+
+    for (i = 0; i < nVertices; ++i)
+        for (j = 0; j < nVertices; ++j)
+            if (i == j)
+                distances[i][j] = 0;
+            else
+                distances[i][j] = graph[i][j];
+
+    for (i = 0; i < nVertices; ++i)
+        for (j = 0; j < nVertices; ++j)
+            for (k = 0; k < nVertices; ++k)
+                if (distances[i][k] != INFINITY && distances[k][j] != INFINITY)
+                    if (distances[i][k] + distances[k][j] < distances[i][j])
+                        distances[i][j] = distances[i][k] + distances[k][j];
+
+    for (i = 0; i < nVertices; ++i)
+        for (j = 0; j < nVertices; ++j) {
+            printf("%3d -> %3d: ", i, j);
+            if (distances[i][j] != INFINITY)
+                printf("%3d\n", distances[i][j]);
+            else
+                printf("INFINITY\n");
+        }
+
+//     for (i = 0; i < nVertices; ++i)
+//         free(distances[i]);
+//     free(distances);
+}
+
