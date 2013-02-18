@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 typedef enum {FALSE = 0, TRUE} Bool_t;
@@ -25,7 +24,7 @@ int main(void) {
 
     srand(time(NULL));
     for (i = 0; i < k_maxHeapSize; ++i)
-        heap_insert(heap, &depth, rand() % 20, nodeSetFlags);
+        heap_insert(heap, &depth, rand() % 100, nodeSetFlags);
 
     heap_print(heap, k_maxHeapSize);
     
@@ -39,38 +38,39 @@ void heap_insert(int* const heap, int* depth, int element, Bool_t* nodeSetFlags)
     int levelFirst = intPower(2, (*depth)) - 1;
     int levelLast = intPower(2, (*depth) + 1) - 2;
 
-    int space;
+    int insertPosition;
     int i;
     Bool_t isSpaceFound = FALSE;
-    printf("%d %d\n", levelFirst, levelLast);
     for (i = levelFirst; i <= levelLast && !isSpaceFound; ++i)
         if (nodeSetFlags[i] == FALSE) {
             heap[i] = element;
             isSpaceFound = TRUE;
             nodeSetFlags[i] = TRUE;
-            space = i;
+            insertPosition = i;
         }
 
     if (!isSpaceFound) {
         ++(*depth);
-        space = i + 1;
-        heap[space] = element;
+        insertPosition = i;
+        heap[insertPosition] = element;
+        nodeSetFlags[insertPosition] = TRUE;
     }
     
     int currentLevel = (*depth);
-    int parent;
+    int parent, parentLevelFirst, currentLevelDisplacement;
     Bool_t isInPlace = FALSE;
     while (!isInPlace) {
         if (currentLevel == 0)
             isInPlace = TRUE;
         else {
-            parent = (intPower(2, (currentLevel) - 1) -1) +
-                    (space - intPower(2, currentLevel) - 1) / 2;
-            if (heap[space] >= heap[parent])
+            parentLevelFirst = (intPower(2, currentLevel - 1) - 1);
+            currentLevelDisplacement = (insertPosition - (intPower(2, currentLevel) - 1));
+            parent = parentLevelFirst + (currentLevelDisplacement / 2);
+            if (heap[insertPosition] >= heap[parent])
                 isInPlace = TRUE;
             else {
-                swap(heap, space, parent);
-                space = parent;
+                swap(heap, insertPosition, parent);
+                insertPosition = parent;
                 --currentLevel;
             }
         }
@@ -81,7 +81,7 @@ void heap_print(int* const heap, int nNodes) {
     if (nNodes > 0) {
         int i;
         int level = 0;
-        printf("%d nodes\n", nNodes);
+        printf("%5d nodes:\n\n", nNodes);
         for (i = 0; i < nNodes; ++i) {
             printf("%5d ", heap[i]);
             if (i == intPower(2, level + 1) - 2) {
