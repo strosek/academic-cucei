@@ -29,47 +29,41 @@
 
 using namespace std;
 
-#define N_KEYWORDS 17
+#define N_KEYWORDS 15
+#define N_LOGICCONSTS 2
 
-#define N_TRANSITIONS 28
+#define N_TRANSITIONS 18
 #define N_STATES      22
 
 typedef enum {
-  TRANS_LETTER = 0, // 0
-  TRANS_UNDERSCORE, // 1
-  TRANS_DIGIT,      // 2
-  TRANS_DOT,        // 3
-  TRANS_SEMICOLON,  // 4
-  TRANS_OPARENT,    // 5
-  TRANS_CPARENT,    // 6
-  TRANS_OBRACKET,   // 7
-  TRANS_CBRACKET,   // 8
-  TRANS_OCURLY,     // 9
-  TRANS_CCURLY,     // 10
-  TRANS_PLUS,       // 11
-  TRANS_MINUS,      // 12
-  TRANS_ASTERISK,   // 13
-  TRANS_SLASH,      // 14
-  TRANS_PERCENT,    // 15
-  TRANS_TILDE,      // 16
-  TRANS_LESSER,     // 17
-  TRANS_GREATER,    // 18
-  TRANS_EQUAL,      // 19
-  TRANS_COLON,      // 20
-  TRANS_QUOTE,      // 21
-  TRANS_EXP,        // 22
-  TRANS_HEX,        // 23
-  TRANS_ZERO,       // 24
-  TRANS_SPACE,      // 25
-  TRANS_X,          // 26
-  TRANS_OCT         // 27
+  TRANS_LETTER = 0,
+  TRANS_UNDERSCORE, 
+  TRANS_DIGIT,
+  TRANS_DOT,
+  TRANS_DELIMITER,
+  TRANS_SIGN,
+  TRANS_ARITHMETIC,
+  TRANS_LESSER,
+  TRANS_GREATER,
+  TRANS_EQUAL,
+  TRANS_COLON,
+  TRANS_QUOTE,
+  TRANS_EXP,
+  TRANS_HEX,
+  TRANS_ZERO,
+  TRANS_SPACE,
+  TRANS_X,
+  TRANS_OCT
 } Transition_t;
 
 
 string keywords[N_KEYWORDS] = {
   "alfabetico", "logico", "real", "entero", "imprime", "publico", "estatico",
-  "sin_tipo", "principal", "clase", "verdadero", "false", "no", "y", "o",
-  "si", "sino"
+  "sin_tipo", "principal", "clase", "no", "y", "o", "si", "sino"
+};
+
+string logic_consts[N_LOGICCONSTS] = {
+  "verdadero", "falso"
 };
 
 
@@ -77,31 +71,31 @@ const int STATE_ERROR        = -1;
 const int STATE_RECOIL_ERROR = -2;
 
 int automata[N_STATES][N_TRANSITIONS] {
-  // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27
-  // l   _   d   .   ;   (   )   [   ]   {   }   +   -   *   /   %   ^   <   >   =   :   "   e   h   0   s   x   o
-  {  1,  1,  2, 20, 12, 12, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13, 13, 17, 16, 14, 18, 11,  1,  1,  6,  0,  1,  2}, // 0
-  {  1,  1,  1, -1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,  1,  1,  1, -2,  1,  1}, // 1*
-  { -2, -2,  2, 20, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,  3, -2,  2, -2, -2,  2}, // 2*
-  { -1, -1,  4, -1, -1, -1, -1, -1, -1, -1, -1,  5,  5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  4, -1, -1,  4}, // 3
-  { -2, -2,  4, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,  4, -2, -2,  4}, // 4*
-  { -1, -1,  4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  4, -1, -1,  4}, // 5
-  { -2, -2, -2, 20, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,  3, -2,  6, -2,  7,  6}, // 6*
-  { -1, -1,  8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  8,  8,  8, -1, -1,  8}, // 7
-  { -2, -2,  8, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,  8,  8,  8, -2, -2,  8}, // 8*
-  {  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9, 10,  9,  9,  9,  9,  9,  9}, // 9
-  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 10*
-  {  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9, 10,  9,  9,  9,  9,  9,  9}, // 11
-  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 12*
-  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 13*
-  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 14*
-  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 15*
-  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, 15, -2, -2, -2, -2, -2, -2, -2, -2}, // 16*
-  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, 15, 15, -2, -2, -2, -2, -2, -2, -2, -2}, // 17*
-  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 19, -1, -1, -1, -1, -1, -1, -1, -2}, // 18
-  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 19*
-  { -1, -1, 21, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 21, -1, -1, 21}, // 20
-  { -2, -2, 21, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,  3, -2, 21, -2, -2, 21}, // 21
-  // l   _   d   .   ;   (   )   [   ]   {   }   +   -   *   /   %   ^   <   >   =   :   "   e   h   0   s   x   o
+  // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
+  // l   _   d   .  dl  si  ar   <   >   =   :   "   e   h   0   s   x   o
+  {  1,  1,  2, 20, 12, 13, 13, 17, 16, 14, 18, 11,  1,  1,  6,  0,  1,  2}, // 0
+  {  1,  1,  1, -1, -2, -2, -2, -2, -2, -2, -2, -2,  1,  1,  1, -2,  1,  1}, // 1*
+  { -2, -2,  2, 20, -2, -2, -2, -2, -2, -2, -2, -2,  3, -2,  2, -2, -2,  2}, // 2*
+  { -1, -1,  4, -1, -1,  5, -1, -1, -1, -1, -1, -1, -1, -1,  4, -1, -1,  4}, // 3
+  { -2, -2,  4, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,  4, -2, -2,  4}, // 4*
+  { -1, -1,  4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,  4, -1, -1,  4}, // 5
+  { -2, -2, -2, 20, -2, -2, -2, -2, -2, -2, -2, -2,  3, -2,  6, -2,  7,  6}, // 6*
+  { -1, -1,  8, -1, -1, -1, -1, -1, -1, -1, -1, -1,  8,  8,  8, -1, -1,  8}, // 7
+  { -2, -2,  8, -2, -2, -2, -2, -2, -2, -2, -2, -2,  8,  8,  8, -2, -2,  8}, // 8*
+  {  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9, 10,  9,  9,  9,  9,  9,  9}, // 9
+  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 10*
+  {  9,  9,  9,  9,  9,  9,  9,  9,  9,  9,  9, 10,  9,  9,  9,  9,  9,  9}, // 11
+  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 12*
+  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 13*
+  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 14*
+  { -2, -2, -2, -2, -2,  2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 15*
+  { -2, -2, -2, -2, -2, -2, -2, -2, -2, 15, -2, -2, -2, -2, -2, -2, -2, -2}, // 16*
+  { -2, -2, -2, -2, -2, -2, -2, -2, 15, 15, -2, -2, -2, -2, -2, -2, -2, -2}, // 17*
+  { -1, -1, -1, -1, -1, -1, -1, -1, -1, 19, -1, -1, -1, -1, -1, -1, -1, -2}, // 18
+  { -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2}, // 19*
+  { -1, -1, 21, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 21, -1, -1, 21}, // 20
+  { -2, -2, 21, -2, -2, -2, -2, -2, -2, -2, -2, -2,  3, -2, 21, -2, -2, 21}  // 21
+  // l   _   d   .  dl  si  ar   <   >   =   :   "   e   h   0   s   x   o
 };
 
 
@@ -110,7 +104,7 @@ Transition_t getTransitionIndex(char character);
 
 int main(void) { 
   string fileName;
-  cout << "NanoJAVA Compiler\n"
+  cout << "NanoJAVA\n"
        << "=================\n" << endl;
   cout << "Nombre del archivo a analizar: ";
   cin >> fileName;
@@ -139,7 +133,15 @@ int main(void) {
             for (int i = 0; i < N_KEYWORDS && !isKeywordMatched; ++i) {
               if (keywords[i].compare(currentLexeme) == 0) {
                 isKeywordMatched = true;
-                token = "palabra_reservada";
+                token = "pal_reservada";
+              }
+            }
+            if (!isKeywordMatched) {
+              for (int i = 0; i < N_LOGICCONSTS && !isKeywordMatched; ++i) {
+                if (logic_consts[i].compare(currentLexeme) == 0) {
+                  isKeywordMatched = true;
+                  token = "const_logica";
+                }
               }
             }
             break;
@@ -157,25 +159,25 @@ int main(void) {
             token = "hexadecimal";
             break;
           case 10 :
-            token = "alfabetico";
+            token = "const_alfabetica";
             break;
           case 12 :
             token = "delimitador";
             break;
           case 13 :
-            token = "operador_aritmetico";
+            token = "op_aritmetico";
             break;
           case 14 :
           case 15 :
           case 16 :
           case 17 :
-            token = "operador_relacional";
+            token = "op_relacional";
             break;
           case 19 :
-            token = "operador_asignacion";
+            token = "op_asignacion";
             break;
           default :
-            cerr << "njavac: error" << endl;
+            cerr << "njavac: error de estado" << endl;
             isErrorFound = true;
             break;
         }
@@ -188,12 +190,11 @@ int main(void) {
           currentLexeme = "";
           nextState = 0;
         }
-        
-        // Actual recoil
+
         sourceFile.unget();
       }
       else if (nextState == STATE_ERROR) {
-        cerr << "njavac: error en analisis lexico: lexema invalido" << 
+        cerr << "njavac: error en analisis lexico: lexema invalido " << 
             currentLexeme << endl;
         isErrorFound = true;
       }
@@ -209,7 +210,7 @@ int main(void) {
       cerr << "njavac: error en analisis lexico" << endl;
   }
   else {
-    cerr << "njavac: error al abrir archivo de codigo fuente" << endl;
+    cerr << "njavac: error al abrir archivo fuente" << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -217,7 +218,7 @@ int main(void) {
 }
 
 Transition_t getTransitionIndex(char character) {
-  Transition_t transitionIndex;
+  Transition_t transitionIndex = TRANS_LETTER;
   
   if (isdigit(character)) {
     if (character == '0')
@@ -243,43 +244,23 @@ Transition_t getTransitionIndex(char character) {
   else {
     switch (character) {
       case ';' :
-        transitionIndex = TRANS_SEMICOLON;
-        break;
       case '(' :
-        transitionIndex = TRANS_OPARENT;
-        break;
       case ')' :
-        transitionIndex = TRANS_CPARENT;
-        break;
       case '[' :
-        transitionIndex = TRANS_OBRACKET;
-        break;
       case ']' :
-        transitionIndex = TRANS_CBRACKET;
-        break;
       case '{' :
-        transitionIndex = TRANS_OCURLY;
-        break;
       case '}' :
-        transitionIndex = TRANS_CCURLY;
+        transitionIndex = TRANS_DELIMITER;
         break;
       case '+' :
-        transitionIndex = TRANS_PLUS;
-        break;
       case '-' :
-        transitionIndex = TRANS_MINUS;
+        transitionIndex = TRANS_SIGN;
         break;
       case '*' :
-        transitionIndex = TRANS_ASTERISK;
-        break;
       case '/' :
-        transitionIndex = TRANS_SLASH;
-        break;
       case '%' :
-        transitionIndex = TRANS_PERCENT;
-        break;
       case '^' :
-        transitionIndex = TRANS_TILDE;
+        transitionIndex = TRANS_ARITHMETIC;
         break;
       case ':' :
         transitionIndex = TRANS_COLON;
@@ -303,7 +284,7 @@ Transition_t getTransitionIndex(char character) {
         transitionIndex = TRANS_DOT;
         break;
       default :
-        cerr << "njavac: caracter no valido: " << "'" << character  <<
+        cerr << "njavac: caracter invalido: " << "'" << character  <<
             "' " << static_cast<int>(character) << endl;
         break;
     }
