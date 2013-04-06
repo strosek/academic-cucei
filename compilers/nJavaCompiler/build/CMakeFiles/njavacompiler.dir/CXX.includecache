@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/edcg/Projects/nJavaCompiler/code/source/../headers/parser.hpp
+string
+-
+utility
+-
+scanner.hpp
+/home/edcg/Projects/nJavaCompiler/code/source/../headers/scanner.hpp
+
+/home/edcg/Projects/nJavaCompiler/code/source/../headers/scanner.hpp
+string
+-
+utility
+-
+fstream
+-
+queue
+-
+tokenlexeme.hpp
+/home/edcg/Projects/nJavaCompiler/code/source/../headers/tokenlexeme.hpp
+
+/home/edcg/Projects/nJavaCompiler/code/source/../headers/tokenlexeme.hpp
+string
+-
+
+/home/edcg/Projects/nJavaCompiler/code/source/parser.cpp
+string
+-
+iostream
+-
+../headers/parser.hpp
+/home/edcg/Projects/nJavaCompiler/code/source/../headers/parser.hpp
+
