@@ -35,6 +35,8 @@ string
 -
 iostream
 -
+cstdlib
+-
 ../headers/parser.hpp
 /home/edcg/Projects/nJavaCompiler/code/source/../headers/parser.hpp
 
