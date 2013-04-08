@@ -1,7 +1,0 @@
-publico clase HolaRaza {
-  alfabetico lenguaje := "NanoJava";
-  publico estatico sin_tipo principal() {
-    imprime("Hola raza en " +lenguaje );
-  }
-}
-
