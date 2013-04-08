@@ -1,1 +1,0 @@
-/usr/bin/c++   -g    CMakeFiles/njavacompiler.dir/code/source/tokenlexeme.cpp.o CMakeFiles/njavacompiler.dir/code/source/parser.cpp.o CMakeFiles/njavacompiler.dir/code/source/main.cpp.o CMakeFiles/njavacompiler.dir/code/source/scanner.cpp.o  -o njavacompiler -rdynamic 

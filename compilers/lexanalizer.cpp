@@ -29,7 +29,7 @@
 
 using namespace std;
 
-#define N_KEYWORDS 15
+#define N_KEYWORDS    15
 #define N_LOGICCONSTS 2
 
 #define N_TRANSITIONS 18

@@ -1,159 +1,72 @@
-/*  Doubly linked list function implementation */
+/*  Doubly linked list implementation */
+/*
+ *  Copyright (c) 2013 Erick Daniel Corona <edcoronag@gmail.com>
+ *
+ *  Permission is hereby granted, free of charge, to any person
+ *  obtaining a copy of this software and associated documentation
+ *   files (the "Software"), to deal in the Software without
+ *   restriction, including without limitation the rights to use,
+ *  copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the
+ *  Software is furnished to do so, subject to the following
+ *  conditions:
+ *
+ *  The above copyright notice and this permission notice shall be
+ *  included in all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ *  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ *  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ *  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ *  OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 #include "dl_list.h"
 
-#include <stdio.h>
-
-static size_t g_listSize;
-
-size_t size() {
-    return g_listSize;
-}
-
-Data front(List list) {
-    return list->data;
-}
-
-Data back(List list) {
+int back(List_t list) {
+  if (!isEmpty(list))
     return list->prev->data;
+  
+  return NOT_FOUND_ERROR;
 }
 
-Node* at(List list, size_t position) {
-    if (position < g_listSize) {
-        Node* temp = list;
-        size_t nodeNo = 0;
-        while (nodeNo < position) {
-            temp = temp->next;
-            ++nodeNo;
-        }
-        return temp;
+int at(List_t list, size_t position) {
+  int value = NOT_FOUND_ERROR;
+  if (!isEmpty(list)) {
+    size_t positionCounter = 0;
+    Node_t* iterator = list;
+    while (iterator->next != list && positionCounter < position) {
+      iterator = iterator->next;
+      ++positionCounter;
     }
-    return NULL;
+    if (positionCounter == position)
+      value = iterator->data;
+  }
+  return value;
 }
 
-Node* search(List list, const Data* element) {
-    Node* temp = list;
-
-    while (temp->data != *element) {
-        temp = temp->next;
-    }
-    return temp;
+Node_t*  searchLeft(List_t list, int key) {
+  
 }
-
-int isEmpty(List list) {
-    return list == NULL;
-}
-
-void print(List list) {
-    Node* temp = list;
-    size_t nodeNo = 0;
-    while (temp->next != list && nodeNo != 0) {
-        printf("%lu: %d", nodeNo, temp->data);
-        ++nodeNo;
-    }
-}
+Node_t*  searchRight(List_t list, int key);
+int      isEmpty(List_t list);
+void     print(List_t list);
 
 /* Modifiers */
-List initialize() {
-    g_listSize = 0;
-    return NULL;
-}
-
-List clear(List list) {
-    Node* temp = list;
-    Node* tempNext = temp->next;
-    while (temp != list) {
-        free(temp);
-        temp = tempNext;
-        tempNext = tempNext->next;
-        --g_listSize;
-    }
-    return NULL;
-}
-
-List pushFront(List list, const Data* element) {
-    Node* newNode = (Node*)malloc(sizeof(Node));
-    newNode->data = *element;
-
-    if (isEmpty(list)) {
-        newNode->next = newNode;
-        newNode->prev = newNode;
-        return newNode;
-    }
-    else {
-        list->next->prev = newNode;
-        newNode->next = list->next;
-        list->next = newNode;
-        newNode->prev = list;
-    }
-
-    return list;
-}
-
-List pushBack(List list, const Data* element) {
-    Node* newNode = (Node*)malloc(sizeof(Node));
-    newNode->data = *element;
-
-    if (isEmpty(list)) {
-        newNode->next = newNode;
-        newNode->prev = newNode;
-        return newNode;
-    }
-    else {
-        list->prev->next = newNode;
-        newNode->next = list;
-        newNode->prev = list->prev;
-        list->prev = newNode;
-    }
-
-    return list;
-}
-
-List popFront(List list) {
-    Node* temp = list->next;
-    list->next->prev = list->prev;
-    list->prev->next = list->next;
-    free(list);
-    return temp;
-}
-
-List popBack(List list) {
-    Node* temp = list->prev;
-    list->prev->prev->next = list;
-    list->prev = list->prev->prev;
-    free(temp);
-    return list;
-}
-
-List insert(List list, Node* position, const Data* element) {
-    Node* temp = list;
-
-    if (position == list) {
-        pushFront(list, element);
-    }
-    while (temp != position && temp != list) {
-        temp = temp->next;
-    }
-    return list;
-}
-
-List insertAt(List list, size_t position, const Data* element) {
-    return list;
-}
-
-List erase(List list, Node* position) {
-    return list;
-}
-
-List eraseAt(List list, size_t position) {
-    return list;
-}
-
-List removeNode(List list, const Data* key) {
-    return list;
-}
-
-List sort(List list) {
-    return list;
-}
-
+List_t initialize(List_t list);
+List_t clear(List_t list);
+List_t pushFront(List_t list, int element);
+List_t pushBack(List_t list, int element);
+List_t popFront(List_t list);
+List_t popBack(List_t list);
+List_t insert(List_t list, Node_t* position, int element);
+List_t insertAt(List_t list, size_t position, int element);
+List_t erase(List_t list, Node_t* position);
+List_t eraseAt(List_t list, size_t position);
+List_t removeLeft(List_t list, int key);
+List_t removeRight(List_t list, int key);
+List_t removeNode_t(List_t list, int key);
+List_t sort(List_t list);

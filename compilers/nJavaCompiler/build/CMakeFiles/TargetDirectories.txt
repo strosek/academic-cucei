@@ -1,1 +1,0 @@
-/home/edcg/Projects/nJavaCompiler/build/CMakeFiles/njavacompiler.dir
