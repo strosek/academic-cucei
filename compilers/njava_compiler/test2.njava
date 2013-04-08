@@ -1,0 +1,11 @@
+publico clase HolaRaza {
+  alfabetico lenguaje := "NanoJava";
+  alfabetico lenguaje2 := "C";
+  entero numero, numero2;
+  real numeroFlotante;
+  publico estatico sin_tipo principal() {
+    imprime("Hola raza en " + lenguaje + lenguaje2);
+    lenguaje := "c++";
+    imprime("Hola raza en " + lenguaje2);
+  }
+}
