@@ -41,9 +41,20 @@ int main(void) {
       size_t i;
 #pragma omp for
       for (i = 0; i < fileSize / sizeof(char); ++i) {
-        printf("original value %c \n", (char)fileBuffer[i]);
-        printf("%u \n", (char)(uintpow(fileBuffer[i], e) % n));
-        fileBuffer[i] = (char)(uintpow(fileBuffer[i], e) % n);
+//         printf("original value: %d \n", (char)fileBuffer[i]);
+//         unsigned int part1 = fileBuffer[i] & 0x07;
+//         printf("%d", part1);
+//         part1 = (uintpow(part1, e) % n);
+//         unsigned int part2 = (fileBuffer[i] & 0x38) >> 3;
+//         printf(", %d", part2);
+//         part2 = (uintpow(part2, e) % n);
+//         unsigned int part3 = (fileBuffer[i] & 0xC0) >> 6;
+//         printf(", %d\n", part3);
+//         part3 = (uintpow(part3, e) % n);
+//         
+//         fileBuffer[i] = (part3 << 6) | (part2 << 3) | part1;
+        uintpow(i, i);
+        fileBuffer[i] ^= 457;
       }
 
       fclose(file);
