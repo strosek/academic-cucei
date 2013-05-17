@@ -26,22 +26,14 @@ int main(void) {
   unsigned int p, q;
   unsigned int n;
   unsigned int e;
-//   unsigned int euler;
   unsigned int d;
 
-//   p = getRandomPrime(); 
-//   q = getRandomPrime();
-//   n = p * q;
-// 
-//   euler = (p - 1) * (q - 1);
-//   e = 1 + rand() % (euler - 1);
-//   d = (1 / e) % euler;
   
-  p = 61;
-  q = 53;
+  p = 3;
+  q = 11;
   n = p * q;
-  e = 17;
-  d = 2753;
+  e = 7;
+  d = 3;
 
   FILE* privateKeyFile;
   FILE* publicKeyFile;

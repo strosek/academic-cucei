@@ -31,24 +31,25 @@ int main(void) {
     fclose(file);
     file = fopen(fileName, "r+b");
     if (file != NULL) {
-      int* fileBuffer = (int*)malloc(sizeof(char) * fileSize);
-      fread(fileBuffer, sizeof(int), fileSize / sizeof(int), file);
+      char* fileBuffer = (char*)malloc(sizeof(char) * fileSize);
+      fread(fileBuffer, sizeof(char), fileSize / sizeof(char), file);
       FILE* publicKeyFile = fopen("public_rsa.key", "r");
       unsigned int n, e;
       fscanf(publicKeyFile, "%u %u", &n, &e);
-      printf("%u %u", n ,e);
+      printf("%u %u\n", n ,e);
 
       size_t i;
 #pragma omp for
-      for (i = 0; i < fileSize / sizeof(int); ++i) {
-        printf("%u ", uintpow(fileBuffer[i], e) % n);
-        fileBuffer[i] = uintpow(fileBuffer[i], e) % n;
+      for (i = 0; i < fileSize / sizeof(char); ++i) {
+        printf("original value %c \n", (char)fileBuffer[i]);
+        printf("%u \n", (char)(uintpow(fileBuffer[i], e) % n));
+        fileBuffer[i] = (char)(uintpow(fileBuffer[i], e) % n);
       }
 
       fclose(file);
-      file = fopen(fileName, "w+b");
+      file = fopen(fileName, "wb");
       
-//       fwrite(fileBuffer, sizeof(int), fileSize / sizeof(int), file);
+      fwrite(fileBuffer, sizeof(char), fileSize / sizeof(char), file);
     }
   }
   else {
