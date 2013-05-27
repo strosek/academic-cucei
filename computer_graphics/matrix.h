@@ -69,5 +69,53 @@ void printMatrix(Matrix_t* matrix) {
   }
 }
 
+void translation2d(Matrix_t* vector, Matrix_t* result, float tx, float ty) {
+  Matrix_t* translationMatrix = allocMatrix(3, 3);
+  translationMatrix->data[0][0] = 1.0f;
+  translationMatrix->data[0][1] = 0.0f;
+  translationMatrix->data[0][2] = tx;
+  translationMatrix->data[1][0] = 0.0f;
+  translationMatrix->data[1][1] = 1.0f;
+  translationMatrix->data[1][2] = ty;
+  translationMatrix->data[2][0] = 0.0f;
+  translationMatrix->data[2][1] = 0.0f;
+  translationMatrix->data[2][2] = 1.0f;
+
+  multiplyMatrices(translationMatrix, vector, result);
+  freeMatrix(translationMatrix);
+}
+
+void rotation2d(Matrix_t* vector, Matrix_t* result, float theta) {
+  Matrix_t* rotationMatrix = allocMatrix(3, 3);
+  rotationMatrix->data[0][0] = cos(theta);
+  rotationMatrix->data[0][1] = -sin(theta);
+  rotationMatrix->data[0][2] = 0.0f;
+  rotationMatrix->data[1][0] = sin(theta);
+  rotationMatrix->data[1][1] = cos(theta);
+  rotationMatrix->data[1][2] = 0.0f;
+  rotationMatrix->data[2][0] = 0.0f;
+  rotationMatrix->data[2][1] = 0.0f;
+  rotationMatrix->data[2][2] = 1.0f;
+
+  multiplyMatrices(rotationMatrix, vector, result);
+  freeMatrix(rotationMatrix);
+}
+
+void scale2d(Matrix_t* vector, Matrix_t* result, float sx, float sy) {
+  Matrix_t* scaleMatrix = allocMatrix(3, 3);
+  scaleMatrix->data[0][0] = sx;
+  scaleMatrix->data[0][1] = 0.0f;
+  scaleMatrix->data[0][2] = 0.0f;
+  scaleMatrix->data[1][0] = 0.0f;
+  scaleMatrix->data[1][1] = sy;
+  scaleMatrix->data[1][2] = 0.0f;
+  scaleMatrix->data[2][0] = 0.0f;
+  scaleMatrix->data[2][1] = 0.0f;
+  scaleMatrix->data[2][2] = 1.0f;
+
+  multiplyMatrices(scaleMatrix, vector, result);
+  freeMatrix(scaleMatrix);
+}
+
 #endif // matrix.h included
 
