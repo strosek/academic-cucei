@@ -1,7 +1,7 @@
 // Library for manipulating simple matrices.
 
-#ifndef matrix_H
-#define matrix_H
+#ifndef MATRIX_H
+#define MATRIX_H
 
 #include <math.h>
 #include <stddef.h>
@@ -34,6 +34,7 @@ void freeMatrix(Matrix_t* matrix) {
   for (i = 0; i < matrix->rows; ++i) {
     free(matrix->data[i]);
   }
+  free(matrix->data);
 
   free(matrix);
 }
@@ -87,11 +88,11 @@ void translation2d(Matrix_t* vector, Matrix_t* result, float tx, float ty) {
 
 void rotation2d(Matrix_t* vector, Matrix_t* result, float theta) {
   Matrix_t* rotationMatrix = allocMatrix(3, 3);
-  rotationMatrix->data[0][0] = cos(theta);
-  rotationMatrix->data[0][1] = -sin(theta);
+  rotationMatrix->data[0][0] = cosf(theta);
+  rotationMatrix->data[0][1] = -sinf(theta);
   rotationMatrix->data[0][2] = 0.0f;
-  rotationMatrix->data[1][0] = sin(theta);
-  rotationMatrix->data[1][1] = cos(theta);
+  rotationMatrix->data[1][0] = sinf(theta);
+  rotationMatrix->data[1][1] = cosf(theta);
   rotationMatrix->data[1][2] = 0.0f;
   rotationMatrix->data[2][0] = 0.0f;
   rotationMatrix->data[2][1] = 0.0f;
