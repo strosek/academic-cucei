@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 
 typedef struct matrix {
@@ -25,6 +26,8 @@ Matrix_t* allocMatrix(size_t cols, size_t rows) {
   size_t i;
   for (i = 0; i < rows; ++i)
     matrix->data[i] = (float*)malloc(sizeof(float) * cols);
+  for (i = 0; i < rows; ++i)
+    memset(matrix->data[i], 0, sizeof(float) * cols);
   
   return matrix;
 }
@@ -43,11 +46,32 @@ void multiplyMatrices(Matrix_t* a, Matrix_t* b, Matrix_t* result) {
   if (result->cols == b->cols && result->rows == a->rows) {
     if (a->cols == b->rows) {
       size_t i, j, k;
+      for (i = 0; i < result->rows; ++i)
+        memset(result->data[i], 0, sizeof(float) * result->cols);
       for (i = 0; i < result->rows; ++i) {
         for (j = 0; j < result->cols; ++j) {
           for (k = 0; k < a->cols; ++k) {
             result->data[i][j] += a->data[i][k] * b->data[k][j];
           }
+        }
+      }
+    }
+    else {
+      fprintf(stderr, "size of matrices is not valid");
+    }
+  }
+  else {
+    fprintf(stderr, "size of result matrix is not valid");
+  }
+}
+
+void sumMatrices(Matrix_t* a, Matrix_t* b, Matrix_t* result) {
+  if (result->cols == a->cols && result->rows == a->rows) {
+    if (a->cols == b->cols && a->rows == b->rows) {
+      size_t i, j;
+      for (i = 0; i < result->rows; ++i) {
+        for (j = 0; j < result->cols; ++j) {
+          result->data[i][j] = a->data[i][j] + b->data[i][j];
         }
       }
     }
