@@ -34,9 +34,8 @@ Matrix_t* allocMatrix(size_t cols, size_t rows) {
 
 void freeMatrix(Matrix_t* matrix) {
   size_t i;
-  for (i = 0; i < matrix->rows; ++i) {
+  for (i = 0; i < matrix->rows; ++i)
     free(matrix->data[i]);
-  }
   free(matrix->data);
 
   free(matrix);
@@ -57,11 +56,11 @@ void multiplyMatrices(Matrix_t* a, Matrix_t* b, Matrix_t* result) {
       }
     }
     else {
-      fprintf(stderr, "size of matrices is not valid");
+      fprintf(stderr, "multiplyMatrices: error: size of matrices is not valid");
     }
   }
   else {
-    fprintf(stderr, "size of result matrix is not valid");
+    fprintf(stderr, "multiplyMatrices: error: size of result matrix is not valid");
   }
 }
 
@@ -76,11 +75,11 @@ void sumMatrices(Matrix_t* a, Matrix_t* b, Matrix_t* result) {
       }
     }
     else {
-      fprintf(stderr, "size of matrices is not valid");
+      fprintf(stderr, "sumMatrices: error: size of matrices is not valid");
     }
   }
   else {
-    fprintf(stderr, "size of result matrix is not valid");
+    fprintf(stderr, "sumMatrices: error: size of result matrix is not valid");
   }
 }
 
@@ -140,6 +139,16 @@ void scale2d(Matrix_t* vector, Matrix_t* result, float sx, float sy) {
 
   multiplyMatrices(scaleMatrix, vector, result);
   freeMatrix(scaleMatrix);
+}
+
+void rotation2dWithPivot(Matrix_t* vector, Matrix_t* pivot, Matrix_t* result, float theta) {
+  rotation2d(vector, result, theta);
+  sumMatrices(result, pivot, result);
+}
+
+void scale2dFixedPoint(Matrix_t* vector, Matrix_t* fixedPoint, Matrix_t* result, float sx, float sy) {
+  scale2d(vector, result, sx, sy);
+  sumMatrices(result, fixedPoint, result);
 }
 
 #endif // matrix.h included

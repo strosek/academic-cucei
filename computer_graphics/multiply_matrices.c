@@ -10,6 +10,7 @@ int main(void) {
   Matrix_t* matC;
   size_t mA = 0, mB = 0, nA = 0, nB = 0;
 
+
   scanf("%lu %lu", &mA, &nA);
   scanf("%lu %lu", &mB, &nB);
 
@@ -22,10 +23,9 @@ int main(void) {
       scanf("%f", &(matA->data[i][j]));
 
   for (i = 0; i < matB->rows; ++i)
-    for (j = 0; j < matB->cols; ++j) {
+    for (j = 0; j < matB->cols; ++j)
       scanf("%f", &(matB->data[i][j]));
-    }
-  
+
 
   matC = allocMatrix(matB->cols, matA->rows);
 
