@@ -151,5 +151,92 @@ void scale2dFixedPoint(Matrix_t* vector, Matrix_t* fixedPoint, Matrix_t* result,
   sumMatrices(result, fixedPoint, result);
 }
 
+void reflectionX2d(Matrix_t* vector, Matrix_t* result) {
+  Matrix_t* reflectionMatrix = allocMatrix(3, 3);
+  reflectionMatrix->data[0][0] =  1.0f;
+  reflectionMatrix->data[0][1] =  0.0f;
+  reflectionMatrix->data[0][2] =  0.0f;
+  reflectionMatrix->data[1][0] =  0.0f;
+  reflectionMatrix->data[1][1] = -1.0f;
+  reflectionMatrix->data[1][2] =  0.0f;
+  reflectionMatrix->data[2][0] =  0.0f;
+  reflectionMatrix->data[2][1] =  0.0f;
+  reflectionMatrix->data[2][2] =  1.0f;
+
+  multiplyMatrices(reflectionMatrix, vector, result);
+
+  freeMatrix(reflectionMatrix);
+}
+
+void reflectionY2d(Matrix_t* vector, Matrix_t* result) {
+  Matrix_t* reflectionMatrix = allocMatrix(3, 3);
+  reflectionMatrix->data[0][0] = -1.0f;
+  reflectionMatrix->data[0][1] =  0.0f;
+  reflectionMatrix->data[0][2] =  0.0f;
+  reflectionMatrix->data[1][0] =  0.0f;
+  reflectionMatrix->data[1][1] =  1.0f;
+  reflectionMatrix->data[1][2] =  0.0f;
+  reflectionMatrix->data[2][0] =  0.0f;
+  reflectionMatrix->data[2][1] =  0.0f;
+  reflectionMatrix->data[2][2] =  1.0f;
+
+  multiplyMatrices(reflectionMatrix, vector, result);
+
+  freeMatrix(reflectionMatrix);
+}
+
+void reflectionXY2d(Matrix_t* vector, Matrix_t* result) {
+  Matrix_t* reflectionMatrix = allocMatrix(3, 3);
+  reflectionMatrix->data[0][0] = -1.0f;
+  reflectionMatrix->data[0][1] =  0.0f;
+  reflectionMatrix->data[0][2] =  0.0f;
+  reflectionMatrix->data[1][0] =  0.0f;
+  reflectionMatrix->data[1][1] = -1.0f;
+  reflectionMatrix->data[1][2] =  0.0f;
+  reflectionMatrix->data[2][0] =  0.0f;
+  reflectionMatrix->data[2][1] =  0.0f;
+  reflectionMatrix->data[2][2] =  1.0f;
+
+  multiplyMatrices(reflectionMatrix, vector, result);
+
+  freeMatrix(reflectionMatrix);
+}
+
+void reflectionYeX2d(Matrix_t* vector, Matrix_t* result) {
+  Matrix_t* reflectionMatrix = allocMatrix(3, 3);
+  reflectionMatrix->data[0][0] =  0.0f;
+  reflectionMatrix->data[0][1] =  1.0f;
+  reflectionMatrix->data[0][2] =  0.0f;
+  reflectionMatrix->data[1][0] =  1.0f;
+  reflectionMatrix->data[1][1] =  0.0f;
+  reflectionMatrix->data[1][2] =  0.0f;
+  reflectionMatrix->data[2][0] =  0.0f;
+  reflectionMatrix->data[2][1] =  0.0f;
+  reflectionMatrix->data[2][2] =  1.0f;
+
+  multiplyMatrices(reflectionMatrix, vector, result);
+
+  freeMatrix(reflectionMatrix);
+}
+
+void reflectionYmX2d(Matrix_t* vector, Matrix_t* result) {
+  Matrix_t* reflectionMatrix = allocMatrix(3, 3);
+  reflectionMatrix->data[0][0] =  0.0f;
+  reflectionMatrix->data[0][1] = -1.0f;
+  reflectionMatrix->data[0][2] =  0.0f;
+  reflectionMatrix->data[1][0] = -1.0f;
+  reflectionMatrix->data[1][1] =  0.0f;
+  reflectionMatrix->data[1][2] =  0.0f;
+  reflectionMatrix->data[2][0] =  0.0f;
+  reflectionMatrix->data[2][1] =  0.0f;
+  reflectionMatrix->data[2][2] =  1.0f;
+
+  multiplyMatrices(reflectionMatrix, vector, result);
+
+  freeMatrix(reflectionMatrix);
+}
+
+
+
 #endif // matrix.h included
 
