@@ -16,6 +16,7 @@ typedef struct matrix {
   float**  data;
 } Matrix_t;
 
+#define PI 3.14159
 
 Matrix_t* allocMatrix(size_t cols, size_t rows) {
   Matrix_t* matrix = (Matrix_t*)malloc(sizeof(Matrix_t));
@@ -236,7 +237,76 @@ void reflectionYmX2d(Matrix_t* vector, Matrix_t* result) {
   freeMatrix(reflectionMatrix);
 }
 
+void rotation3dX(Matrix_t* vector, Matrix_t* result, float theta) {
+  Matrix_t* rotationMatrix = allocMatrix(3, 3);
+  rotationMatrix->data[0][0] = 1.0f;
+  rotationMatrix->data[0][1] = 0.0f;
+  rotationMatrix->data[0][2] = 0.0f;
+  rotationMatrix->data[1][0] = 0.0f;
+  rotationMatrix->data[1][1] = cosf(theta);
+  rotationMatrix->data[1][2] = -sinf(theta);
+  rotationMatrix->data[2][0] = 0.0f;
+  rotationMatrix->data[2][1] = sinf(theta);
+  rotationMatrix->data[2][2] = cos(theta);
 
+  multiplyMatrices(rotationMatrix, vector, result);
 
+  freeMatrix(rotationMatrix);
+}
+
+void rotation3dY(Matrix_t* vector, Matrix_t* result, float theta) {
+  Matrix_t* rotationMatrix = allocMatrix(3, 3);
+  rotationMatrix->data[0][0] = cosf(theta);
+  rotationMatrix->data[0][1] = 0.0f;
+  rotationMatrix->data[0][2] = sinf(theta);
+  rotationMatrix->data[1][0] = 0.0f;
+  rotationMatrix->data[1][1] = 1.0f;
+  rotationMatrix->data[1][2] = 0.0f;
+  rotationMatrix->data[2][0] = -sinf(theta);
+  rotationMatrix->data[2][1] = 0.0f;
+  rotationMatrix->data[2][2] = cosf(theta);
+
+  multiplyMatrices(rotationMatrix, vector, result);
+
+  freeMatrix(rotationMatrix);
+}
+
+void rotation3dZ(Matrix_t* vector, Matrix_t* result, float theta) {
+  Matrix_t* rotationMatrix = allocMatrix(3, 3);
+  rotationMatrix->data[0][0] = cosf(theta);
+  rotationMatrix->data[0][1] = -sinf(theta);
+  rotationMatrix->data[0][2] = 0.0f;
+  rotationMatrix->data[1][0] = sinf(theta);
+  rotationMatrix->data[1][1] = cosf(theta);
+  rotationMatrix->data[1][2] = 0.0f;
+  rotationMatrix->data[2][0] = 0.0f;
+  rotationMatrix->data[2][1] = 0.0f;
+  rotationMatrix->data[2][2] = 1.0f;
+
+  multiplyMatrices(rotationMatrix, vector, result);
+
+  freeMatrix(rotationMatrix);
+}
+
+float getRadians(float degrees) {
+  return degrees * PI / 180.0f;
+}
+
+void projection(Matrix_t* vector, Matrix_t* result) {
+  Matrix_t* projectionMatrix = allocMatrix(3, 3);
+  projectionMatrix->data[0][0] = 1.0f;
+  projectionMatrix->data[0][1] = 0.0f;
+  projectionMatrix->data[0][2] = 0.0f;
+  projectionMatrix->data[1][0] = 0.0f;
+  projectionMatrix->data[1][1] = 1.0f;
+  projectionMatrix->data[1][2] = 0.0f;
+  projectionMatrix->data[2][0] = 0.0f;
+  projectionMatrix->data[2][1] = 0.0f;
+  projectionMatrix->data[2][2] = 0.0f;
+
+  multiplyMatrices(projectionMatrix, vector, result);
+
+  freeMatrix(projectionMatrix);
+}
 #endif // matrix.h included
 
