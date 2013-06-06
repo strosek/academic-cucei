@@ -1,4 +1,4 @@
-// Library for manipulating simple matrices.
+/// Library for manipulating simple matrices.
 
 #ifndef MATRIX_H
 #define MATRIX_H
@@ -143,13 +143,21 @@ void scale2d(Matrix_t* vector, Matrix_t* result, float sx, float sy) {
 }
 
 void rotation2dWithPivot(Matrix_t* vector, Matrix_t* pivot, Matrix_t* result, float theta) {
-  rotation2d(vector, result, theta);
-  sumMatrices(result, pivot, result);
+  size_t i;
+  for (i = 0; i < 2; ++i) {
+    printf("pivot: %f\n", pivot->data[i][0]);
+    printf("vector: %f\n", vector->data[i][0]);
+  }
+  result->data[0][0] = pivot->data[0][0] + (vector->data[0][0] - pivot->data[0][0]) * cosf(theta) - 
+      (vector->data[1][0] - pivot->data[1][0]) * sinf(theta);
+
+  result->data[1][0] = pivot->data[1][0] + (vector->data[0][0] - pivot->data[0][0]) * sinf(theta) + 
+      (vector->data[1][0] - pivot->data[1][0]) * cosf(theta);
 }
 
 void scale2dFixedPoint(Matrix_t* vector, Matrix_t* fixedPoint, Matrix_t* result, float sx, float sy) {
-  scale2d(vector, result, sx, sy);
-  sumMatrices(result, fixedPoint, result);
+  result->data[0][0] = vector->data[0][0] * sx + fixedPoint->data[0][0] * (1.0f - sx);
+  result->data[1][0] = vector->data[1][0] * sy + fixedPoint->data[1][0] * (1.0f - sy);
 }
 
 void reflectionX2d(Matrix_t* vector, Matrix_t* result) {
@@ -241,10 +249,10 @@ void reflectionGeneral2d(Matrix_t* point, Matrix_t* result, float m, float b) {
   Matrix_t* temporal = allocMatrix(1, 3);
   Matrix_t* temporal2 = allocMatrix(1, 3);
   Matrix_t* temporal3 = allocMatrix(1, 3);
-  translation2d(point, temporal, -b, 0);
-  rotation2d(temporal, temporal2, atanf(m / 1.0f));
+  translation2d(point, temporal, 0, -b);
+  rotation2d(temporal, temporal2, -atanf(m / 1.0f));
   reflectionX2d(temporal2, temporal3);
-  rotation2d(temporal3, result, -atanf(m / 1.0f));
+  rotation2d(temporal3, result, atanf(m / 1.0f));
 
   freeMatrix(temporal);
   freeMatrix(temporal2);
