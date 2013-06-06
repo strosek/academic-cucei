@@ -237,11 +237,11 @@ void reflectionYmX2d(Matrix_t* vector, Matrix_t* result) {
   freeMatrix(reflectionMatrix);
 }
 
-void reflectionGeneral(Matrix_t* point, Matrix_t* result, float m, float b) {
+void reflectionGeneral2d(Matrix_t* point, Matrix_t* result, float m, float b) {
   Matrix_t* temporal = allocMatrix(1, 3);
   Matrix_t* temporal2 = allocMatrix(1, 3);
   Matrix_t* temporal3 = allocMatrix(1, 3);
-  translation2d(point, temporal, -b);
+  translation2d(point, temporal, -b, 0);
   rotation2d(temporal, temporal2, atanf(m / 1.0f));
   reflectionX2d(temporal2, temporal3);
   rotation2d(temporal3, result, -atanf(m / 1.0f));
@@ -249,6 +249,11 @@ void reflectionGeneral(Matrix_t* point, Matrix_t* result, float m, float b) {
   freeMatrix(temporal);
   freeMatrix(temporal2);
   freeMatrix(temporal3);
+}
+
+void reflectionParallelYPoint(Matrix_t* point, Matrix_t* result, float xShift) {
+  reflectionY2d(point, result);
+  translation2d(point, result, xShift, 0.0f);
 }
 
 void rotation3dX(Matrix_t* vector, Matrix_t* result, float theta) {
