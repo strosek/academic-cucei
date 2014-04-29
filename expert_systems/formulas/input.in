@@ -1,1 +1,2 @@
-#X(X->Y),
+@X#Y(c(cor(Y))&c(Y)&X!=Y&vel(X)<vel(Y)->k(Y))
+
