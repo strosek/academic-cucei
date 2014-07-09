@@ -3,6 +3,7 @@
 #include "matrix.h"
 
 #include <stdio.h>
+#include <string.h>
 
 
 void shiftRow(int ** const matrix, size_t m, size_t row, size_t times)
@@ -65,11 +66,7 @@ void initializeMatrix(int ** const matrix, size_t m, size_t n)
 #pragma omp parallel for
   for (size_t i = 0UL; i < n; ++i)
   {
-    for (size_t j = 0UL; j < m; ++j)
-    {
-      // TODO: change this for a memset call.
-      matrix[i][j] = 0;
-    }
+    memset(matrix[i], 0U, sizeof(size_t) * m);
   }
 }
 
