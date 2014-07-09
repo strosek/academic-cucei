@@ -1,5 +1,8 @@
+/* Dynamic-sized matrix common operations implementation */
+
+#include "matrix.h"
+
 #include <stdio.h>
-#include <stdlib.h>
 
 
 void shiftRow(int ** const matrix, size_t m, size_t row, size_t times)
@@ -32,7 +35,7 @@ void shiftColumn(int ** const matrix, size_t n, size_t column, size_t times)
   }
 }
 
-void multiply(const int ** const a, const int ** const b, int ** const ab,
+void multiplyMatrices(const int ** const a, const int ** const b, int ** const ab,
               size_t size)
 {
 #pragma omp parallel for
@@ -57,7 +60,7 @@ void printMatrix(const int ** const matrix, size_t m, size_t n)
   }
 }
 
-void initialize(int ** const matrix, size_t m, size_t n)
+void initializeMatrix(int ** const matrix, size_t m, size_t n)
 {
 #pragma omp parallel for
   for (size_t i = 0UL; i < n; ++i)
@@ -90,4 +93,5 @@ void freeMatrix(int ** const matrix, size_t n)
   }
   free((int*)matrix);
 }
+
 
