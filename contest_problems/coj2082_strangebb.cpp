@@ -22,91 +22,214 @@
 //  OTHER DEALINGS IN THE SOFTWARE.
 
 
-#include <iostream>
+// This file implements solution to problem 2082 (Strange Billboard) from
+// Caribbean Online Judge.
+
+
 #include <cstdlib>
+#include <iostream>
+#include <utility>
 
 using namespace std;
 
 
-int main()
+class StrangeBillboard
 {
-  size_t sizeX = 1UL;
-  size_t sizeY = 1UL;
-  size_t i = 0UL;
-  size_t j = 0UL;
-  char tile = 'A';
-  bool isPossible = true;
-  size_t taps = 0UL;
-  int **board = NULL;
-
-  while (sizeX > 0 && sizeY > 0)
+public:
+  StrangeBillboard() :
+    m_board(NULL),
+    m_sizeX(0UL),
+    m_sizeY(0UL),
+    m_blackTiles(0UL),
+    m_taps(0UL)
   {
-    cin >> sizeX;
-    cin >> sizeY;
-    if (sizeX < 1 && sizeY < 1)
-    {
-      goto end;
-    }
+  }
 
-    taps = 0;
-
-    //////////////////////////////////////////////////////////////////////////
-    // Allocate and load matrix.
-    //////////////////////////////////////////////////////////////////////////
-    board = new int*[sizeY];
-    for (i = 0; i < sizeY; ++i)
+  void solve()
+  {
+    while (true)
     {
-      board[i] = new int[sizeX];
-    }
-
-    for (i = 0; i < sizeY; ++i)
-    {
-      for (j = 0; j < sizeX; ++j)
+      cin >> m_sizeX;
+      cin >> m_sizeY;
+      if (m_sizeX < 1 && m_sizeY < 1)
       {
-        // X is white tile, . is white tile.
-        cin >> tile;
-        if (tile == '.')
+        goto end;
+      }
+
+      m_blackTiles = 0UL;
+      /////////////////////////////////////////////////////////////////////////
+      // Allocate and load matrix.
+      /////////////////////////////////////////////////////////////////////////
+      m_board = new bool*[m_sizeY];
+      for (size_t i = 0; i < m_sizeY; ++i)
+      {
+        m_board[i] = new bool[m_sizeX];
+      }
+
+      char tile = ' ';
+      for (size_t i = 0; i < m_sizeY; ++i)
+      {
+        for (size_t j = 0; j < m_sizeX; ++j)
         {
-          board[i][j] = 0;
+          // X is white tile, . is white tile.
+          cin >> tile;
+          if (tile == '.')
+          {
+            m_board[i][j] = false;
+          }
+          else
+          {
+            m_board[i][j] = true;
+            ++m_blackTiles;
+          }
         }
-        else
+      }
+
+      /////////////////////////////////////////////////////////////////////////
+      // Count minimal taps.
+      /////////////////////////////////////////////////////////////////////////
+      bool hasSolution = true;
+      size_t taps = 0UL;
+      while (m_blackTiles > 0 && hasSolution)
+      {
+        for (size_t i = 0UL; i < m_sizeY; ++i)
         {
-          board[i][j] = 1;
+          for (size_t j = 0UL; j < m_sizeX; ++j)
+          {
+            if (getTapQuality(j, i) > 0)
+            {
+              tap(j, i);
+            }
+          }
         }
+      }
+
+
+      /////////////////////////////////////////////////////////////////////////
+      // Show results.
+      /////////////////////////////////////////////////////////////////////////
+      if (hasSolution)
+      {
+        cout << "You have to tap " << taps << " tiles." << endl;
+      }
+      else
+      {
+        cout << "Damaged billboard." << endl;
+      }
+
+
+      /////////////////////////////////////////////////////////////////////////
+      // Clean memory.
+      /////////////////////////////////////////////////////////////////////////
+      for (size_t i = 0; i < m_sizeY; ++i)
+      {
+        delete[] m_board[i];
+      }
+      delete[] m_board;
+      m_board = NULL;
+    }
+
+end:
+    return;
+  }
+
+private:
+  void tap(size_t x, size_t y)
+  {
+    ++m_taps;
+    m_board[x][y] = !m_board[x][y];
+    if (isInRange(x + 1, y))
+    {
+      (m_board[x + 1][y] = !m_board[x + 1][y]) ? ++m_blackTiles :
+                                                 --m_blackTiles;
+    }
+    if (isInRange(x - 1, y))
+    {
+      (m_board[x - 1][y] = !m_board[x - 1][y]) ? ++m_blackTiles :
+                                                 --m_blackTiles;
+    }
+    if (isInRange(x, y + 1))
+    {
+      (m_board[x][y + 1] = !m_board[x][y + 1]) ? ++m_blackTiles :
+                                                 --m_blackTiles;
+    }
+    if (isInRange(x, y - 1))
+    {
+      (m_board[x][y - 1] = !m_board[x][y - 1]) ? ++m_blackTiles :
+                                                 --m_blackTiles;
+    }
+  }
+
+  bool isInRange(size_t x, size_t y)
+  {
+    return (x > 0 && x < m_sizeX && y > 0 && y < m_sizeY);
+  }
+
+  int  getTapQuality(size_t x, size_t y)
+  {
+    int quality = 0;
+
+    if (isInRange(x + 1, y))
+    {
+      if (m_board[x + 1][y] == true)
+      {
+        ++quality;
+      }
+      else
+      {
+        --quality;
+      }
+    }
+    if (isInRange(x - 1, y))
+    {
+      if (m_board[x - 1][y] == true)
+      {
+        ++quality;
+      }
+      else
+      {
+        --quality;
+      }
+    }
+    if (isInRange(x, y + 1))
+    {
+      if (m_board[x][y + 1] == true)
+      {
+        ++quality;
+      }
+      else
+      {
+        --quality;
+      }
+    }
+    if (isInRange(x, y - 1))
+    {
+      if (m_board[x][y - 1] == true)
+      {
+        ++quality;
+      }
+      else
+      {
+        --quality;
       }
     }
 
-    //////////////////////////////////////////////////////////////////////////
-    // Count minimal taps.
-    //////////////////////////////////////////////////////////////////////////
-
-
-
-    //////////////////////////////////////////////////////////////////////////
-    // Show results.
-    //////////////////////////////////////////////////////////////////////////
-    if (isPossible)
-    {
-      cout << "You have to tap " << taps << " tiles." << endl;
-    }
-    else
-    {
-      cout << "Damaged billboard." << endl;
-    }
-
-
-    //////////////////////////////////////////////////////////////////////////
-    // Clean memory.
-    //////////////////////////////////////////////////////////////////////////
-    for (i = 0; i < sizeY; ++i)
-    {
-      delete[] board[i];
-    }
-    delete[] board;
-    board = NULL;
+    return quality;
   }
 
-end:
+  bool **m_board;
+  size_t m_sizeX;
+  size_t m_sizeY;
+  size_t m_blackTiles;
+  size_t m_taps;
+};
+
+
+int main()
+{
+  StrangeBillboard board;
+  board.solve();
+
   return EXIT_SUCCESS;
 }
 
