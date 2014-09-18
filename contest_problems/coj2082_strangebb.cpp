@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <climits>
+#include <cmath>
 #include <utility>
 
 using namespace std;
@@ -90,13 +91,15 @@ public:
       // Count minimal taps.
       /////////////////////////////////////////////////////////////////////////
       bool hasSolution = true;
-      bool hasMoves = true;
       size_t minimumBlackTiles = ULONG_MAX;
-      size_t tapsNoImprove = 0UL;
+      size_t passesNoImprove = 0UL;
       m_taps = 0UL;
-      while (m_blackTiles > 0 && hasSolution && hasMoves)
+      int bestTapX = 0;
+      int bestTapY = 0;
+      int bestTapQuality;
+      while (m_blackTiles > 0 && hasSolution)
       {
-        hasMoves = false;
+        bestTapQuality = INT_MIN;
 #ifdef DEBUG
         cout << "while" << endl;
         for (int i = 0; i < m_sizeY; ++i)
@@ -112,44 +115,58 @@ public:
 #endif
         for (int i = 0; i < m_sizeY; ++i)
         {
-#ifdef DEBUG
-        cout << "for1" << endl;
-#endif
           for (int j = 0; j < m_sizeX; ++j)
           {
-#ifdef DEBUG
-            cout << "for2" << endl;
-            cout << "tap quality at: " << i << ' ' << j << ": " << getTapQuality(j, i) << endl;
-#endif
-            if (getTapQuality(j, i) > 0)
+            int tapQuality = getTapQuality(j, i);
+            if (tapQuality > bestTapQuality)
             {
-              if (minimumBlackTiles < m_blackTiles)
+              bestTapX = j;
+              bestTapY = i;
+              bestTapQuality = tapQuality;
+            }
+            else if (tapQuality == bestTapQuality)
+            {
+              int centerX = m_sizeX / 2;
+              int centerY = m_sizeY / 2;
+              float distanceToCenterBest = sqrt(pow(bestTapX - centerX, 2.0f) +
+                                                pow(bestTapY - centerY, 2.0f));
+              float distanceToCenterNew = sqrt(pow(j - centerX, 2.0f) +
+                                               pow(i - centerY, 2.0f));
+              if (distanceToCenterNew < distanceToCenterBest)
               {
-                minimumBlackTiles = m_blackTiles;
-              }
-              hasMoves = true;
-              tap(j, i);
-              if (minimumBlackTiles <= m_blackTiles)
-              {
-                ++tapsNoImprove;
-                if (tapsNoImprove > 10)
-                {
-                  hasSolution = false;
-                  // Break for loops.
-                  i = m_sizeY;
-                  j = m_sizeX;
-                }
-              }
-              else
-              {
-                tapsNoImprove = 0UL;
+                bestTapX = j;
+                bestTapY = i;
+                bestTapQuality = tapQuality;
               }
             }
           }
         }
+
+        if (bestTapQuality > 0)
+        {
+#ifdef DEBUG
+          cout << "best tap quality: " << bestTapQuality << endl;
+#endif
+          tap(bestTapX, bestTapY);
+        }
+
+        if (m_blackTiles < minimumBlackTiles)
+        {
+          minimumBlackTiles = m_blackTiles;
+          passesNoImprove = 0UL;
+        }
+        else
+        {
+          ++passesNoImprove;
+          if (passesNoImprove > 10)
+          {
+            hasSolution = false;
+            goto results;
+          }
+        }
+
 #ifdef DEBUG
         cout << "blacktiles: " << m_blackTiles << endl;
-        break;
 #endif
       }
 
@@ -157,6 +174,7 @@ public:
       /////////////////////////////////////////////////////////////////////////
       // Show results.
       /////////////////////////////////////////////////////////////////////////
+results:
       if (hasSolution)
       {
         cout << "You have to tap " << m_taps << " tiles." << endl;
@@ -165,10 +183,6 @@ public:
       {
         cout << "Damaged billboard." << endl;
       }
-
-#ifdef DEBUG
-      break;
-#endif
 
 
       /////////////////////////////////////////////////////////////////////////
@@ -189,6 +203,9 @@ end:
 private:
   void tap(int x, int y)
   {
+#ifdef DEBUG
+    cout << "tapping " << x << " " << y << endl;
+#endif
     ++m_taps;
 
     (m_board[y][x] = !m_board[y][x]) ? ++m_blackTiles : --m_blackTiles;
