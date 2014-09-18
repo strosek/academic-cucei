@@ -28,6 +28,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <climits>
 #include <utility>
 
 using namespace std;
@@ -89,11 +90,13 @@ public:
       // Count minimal taps.
       /////////////////////////////////////////////////////////////////////////
       bool hasSolution = true;
-      size_t previousBlacks = 0UL;
+      bool hasMoves = true;
+      size_t minimumBlackTiles = ULONG_MAX;
       size_t tapsNoImprove = 0UL;
       m_taps = 0UL;
-      while (m_blackTiles > 0 && hasSolution)
+      while (m_blackTiles > 0 && hasSolution && hasMoves)
       {
+        hasMoves = false;
 #ifdef DEBUG
         cout << "while" << endl;
         for (int i = 0; i < m_sizeY; ++i)
@@ -105,6 +108,7 @@ public:
           cout << endl;
         }
         cout << "m_blackTiles = " << m_blackTiles << endl;
+        cout << "mininmumBlackTiles = " << minimumBlackTiles << endl;
 #endif
         for (int i = 0; i < m_sizeY; ++i)
         {
@@ -119,9 +123,13 @@ public:
 #endif
             if (getTapQuality(j, i) > 0)
             {
-              previousBlacks = m_blackTiles;
+              if (minimumBlackTiles < m_blackTiles)
+              {
+                minimumBlackTiles = m_blackTiles;
+              }
+              hasMoves = true;
               tap(j, i);
-              if (previousBlacks >= m_blackTiles)
+              if (minimumBlackTiles <= m_blackTiles)
               {
                 ++tapsNoImprove;
                 if (tapsNoImprove > 10)
@@ -139,6 +147,10 @@ public:
             }
           }
         }
+#ifdef DEBUG
+        cout << "blacktiles: " << m_blackTiles << endl;
+        break;
+#endif
       }
 
 
