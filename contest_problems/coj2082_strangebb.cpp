@@ -38,8 +38,8 @@ class StrangeBillboard
 public:
   StrangeBillboard() :
     m_board(NULL),
-    m_sizeX(0UL),
-    m_sizeY(0UL),
+    m_sizeX(0),
+    m_sizeY(0),
     m_blackTiles(0UL),
     m_taps(0UL)
   {
@@ -49,8 +49,8 @@ public:
   {
     while (true)
     {
-      cin >> m_sizeX;
       cin >> m_sizeY;
+      cin >> m_sizeX;
       if (m_sizeX < 1 && m_sizeY < 1)
       {
         goto end;
@@ -61,15 +61,15 @@ public:
       // Allocate and load matrix.
       /////////////////////////////////////////////////////////////////////////
       m_board = new bool*[m_sizeY];
-      for (size_t i = 0; i < m_sizeY; ++i)
+      for (int i = 0; i < m_sizeY; ++i)
       {
         m_board[i] = new bool[m_sizeX];
       }
 
       char tile = ' ';
-      for (size_t i = 0; i < m_sizeY; ++i)
+      for (int i = 0; i < m_sizeY; ++i)
       {
-        for (size_t j = 0; j < m_sizeX; ++j)
+        for (int j = 0; j < m_sizeX; ++j)
         {
           // X is white tile, . is white tile.
           cin >> tile;
@@ -89,16 +89,53 @@ public:
       // Count minimal taps.
       /////////////////////////////////////////////////////////////////////////
       bool hasSolution = true;
-      size_t taps = 0UL;
+      size_t previousBlacks = 0UL;
+      size_t tapsNoImprove = 0UL;
+      m_taps = 0UL;
       while (m_blackTiles > 0 && hasSolution)
       {
-        for (size_t i = 0UL; i < m_sizeY; ++i)
+#ifdef DEBUG
+        cout << "while" << endl;
+        for (int i = 0; i < m_sizeY; ++i)
         {
-          for (size_t j = 0UL; j < m_sizeX; ++j)
+          for (int j = 0; j < m_sizeX; ++j)
           {
+            cout << m_board[i][j] << " ";
+          }
+          cout << endl;
+        }
+        cout << "m_blackTiles = " << m_blackTiles << endl;
+#endif
+        for (int i = 0; i < m_sizeY; ++i)
+        {
+#ifdef DEBUG
+        cout << "for1" << endl;
+#endif
+          for (int j = 0; j < m_sizeX; ++j)
+          {
+#ifdef DEBUG
+            cout << "for2" << endl;
+            cout << "tap quality at: " << i << ' ' << j << ": " << getTapQuality(j, i) << endl;
+#endif
             if (getTapQuality(j, i) > 0)
             {
+              previousBlacks = m_blackTiles;
               tap(j, i);
+              if (previousBlacks >= m_blackTiles)
+              {
+                ++tapsNoImprove;
+                if (tapsNoImprove > 10)
+                {
+                  hasSolution = false;
+                  // Break for loops.
+                  i = m_sizeY;
+                  j = m_sizeX;
+                }
+              }
+              else
+              {
+                tapsNoImprove = 0UL;
+              }
             }
           }
         }
@@ -110,18 +147,22 @@ public:
       /////////////////////////////////////////////////////////////////////////
       if (hasSolution)
       {
-        cout << "You have to tap " << taps << " tiles." << endl;
+        cout << "You have to tap " << m_taps << " tiles." << endl;
       }
       else
       {
         cout << "Damaged billboard." << endl;
       }
 
+#ifdef DEBUG
+      break;
+#endif
+
 
       /////////////////////////////////////////////////////////////////////////
       // Clean memory.
       /////////////////////////////////////////////////////////////////////////
-      for (size_t i = 0; i < m_sizeY; ++i)
+      for (int i = 0; i < m_sizeY; ++i)
       {
         delete[] m_board[i];
       }
@@ -134,44 +175,45 @@ end:
   }
 
 private:
-  void tap(size_t x, size_t y)
+  void tap(int x, int y)
   {
     ++m_taps;
-    m_board[x][y] = !m_board[x][y];
+
+    (m_board[y][x] = !m_board[y][x]) ? ++m_blackTiles : --m_blackTiles;
     if (isInRange(x + 1, y))
     {
-      (m_board[x + 1][y] = !m_board[x + 1][y]) ? ++m_blackTiles :
+      (m_board[y][x + 1] = !m_board[y][x + 1]) ? ++m_blackTiles :
                                                  --m_blackTiles;
     }
     if (isInRange(x - 1, y))
     {
-      (m_board[x - 1][y] = !m_board[x - 1][y]) ? ++m_blackTiles :
+      (m_board[y][x - 1] = !m_board[y][x - 1]) ? ++m_blackTiles :
                                                  --m_blackTiles;
     }
     if (isInRange(x, y + 1))
     {
-      (m_board[x][y + 1] = !m_board[x][y + 1]) ? ++m_blackTiles :
+      (m_board[y + 1][x] = !m_board[y + 1][x]) ? ++m_blackTiles :
                                                  --m_blackTiles;
     }
     if (isInRange(x, y - 1))
     {
-      (m_board[x][y - 1] = !m_board[x][y - 1]) ? ++m_blackTiles :
+      (m_board[y - 1][x] = !m_board[y - 1][x]) ? ++m_blackTiles :
                                                  --m_blackTiles;
     }
   }
 
-  bool isInRange(size_t x, size_t y)
+  bool isInRange(int x, int y)
   {
-    return (x > 0 && x < m_sizeX && y > 0 && y < m_sizeY);
+    return (x >= 0 && x < m_sizeX && y >= 0 && y < m_sizeY);
   }
 
-  int  getTapQuality(size_t x, size_t y)
+  int  getTapQuality(int x, int y)
   {
     int quality = 0;
 
     if (isInRange(x + 1, y))
     {
-      if (m_board[x + 1][y] == true)
+      if (m_board[y][x + 1] == true)
       {
         ++quality;
       }
@@ -182,7 +224,7 @@ private:
     }
     if (isInRange(x - 1, y))
     {
-      if (m_board[x - 1][y] == true)
+      if (m_board[y][x - 1] == true)
       {
         ++quality;
       }
@@ -193,7 +235,7 @@ private:
     }
     if (isInRange(x, y + 1))
     {
-      if (m_board[x][y + 1] == true)
+      if (m_board[y + 1][x] == true)
       {
         ++quality;
       }
@@ -204,7 +246,7 @@ private:
     }
     if (isInRange(x, y - 1))
     {
-      if (m_board[x][y - 1] == true)
+      if (m_board[y - 1][x] == true)
       {
         ++quality;
       }
@@ -212,14 +254,22 @@ private:
       {
         --quality;
       }
+    }
+    if (m_board[y][x] == true)
+    {
+        ++quality;
+    }
+    else
+    {
+        --quality;
     }
 
     return quality;
   }
 
   bool **m_board;
-  size_t m_sizeX;
-  size_t m_sizeY;
+  int    m_sizeX;
+  int    m_sizeY;
   size_t m_blackTiles;
   size_t m_taps;
 };
