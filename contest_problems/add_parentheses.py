@@ -1,10 +1,8 @@
 #!/bin/python3
-'''
+"""
 Class that implements solution to Leetcode Problem at:
 https://leetcode.com/problems/different-ways-to-add-parentheses/
-'''
 
-'''
 MIT License
 
 Copyright (c) [year] [fullname]
@@ -29,19 +27,16 @@ furnished to do so, subject to the following conditions:
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE
     SOFTWARE.
-'''
-
+"""
+import collections
 import re
+from typing import List, Any
+
 
 class Solution:
-    '''Implement solution to AddParenteses problem. '''
-
-    def add_parentheses(self, expression, initial_length):
-        ''' Generate list with add parentheses for providad expresson. '''
-        pass
-
+    """Implement solution to AddParenteses problem. """
     def diff_ways_to_compute(self, expression):
-        '''
+        """
         Generate a list of strings with the possible ways of adding parentheses.
 
         Parameters:
@@ -49,11 +44,43 @@ class Solution:
 
         Returns:
             List of expressions with added parentheses.
-        '''
-        n_operators = len(re.findall('[+-*]', expression))
-        return self.add_parentheses(expression, n_operators)
+        """
+        operands: List[str] = re.findall(r'\d+', expression)
+        operators = re.findall(r'[\+\-\*]', expression)
+
+        # n-1 opening/closing parentheses lists, for n operands
+        opening_parentheses = [1,1,1,0]
+        closing_parentheses = [0,0,0,3]
+
+        expressions = []
+
+        expression_builder_list = []
+        # Build expression and append to the list of expressions
+        i = 0
+        for operator in operators:
+            expression_builder_list.append(opening_parentheses[i] * '(')
+            expression_builder_list.append(operands[i])
+            expression_builder_list.append(closing_parentheses[i] * ')')
+
+            if i < len(operators):
+                expression_builder_list.append(operators[i])
+
+            i += 1
+
+        expression_builder_list.append(opening_parentheses[i] * '(')
+        expression_builder_list.append(operands[i])
+        expression_builder_list.append(closing_parentheses[i] * ')')
+
+        expressions.append(''.join(expression_builder_list))
+
+        return expressions
+
 
 def main():
-    ''' Run program with some inputs. '''
+    """ Run program with some inputs. """
     solution = Solution()
-    solution.diff_ways_to_compute('2*3-4*5')
+    print('Running test for Add Parentheses problem ...')
+    print(solution.diff_ways_to_compute('2*3-4*5'))
+
+
+main()
