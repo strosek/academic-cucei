@@ -28,10 +28,7 @@ furnished to do so, subject to the following conditions:
     THE
     SOFTWARE.
 """
-import collections
 import re
-from typing import List, Any
-
 
 class Solution:
     """Implement solution to AddParenteses problem. """
@@ -45,19 +42,19 @@ class Solution:
         Returns:
             List of expressions with added parentheses.
         """
-        operands: List[str] = re.findall(r'\d+', expression)
+        operands = re.findall(r'\d+', expression)
         operators = re.findall(r'[\+\-\*]', expression)
 
         # n-1 opening/closing parentheses lists, for n operands
-        opening_parentheses = [1,1,1,0]
-        closing_parentheses = [0,0,0,3]
+        opening_parentheses = [1, 1, 1, 0]
+        closing_parentheses = [0, 0, 0, 3]
 
         expressions = []
 
         expression_builder_list = []
         # Build expression and append to the list of expressions
         i = 0
-        for operator in operators:
+        while i < len(operators):
             expression_builder_list.append(opening_parentheses[i] * '(')
             expression_builder_list.append(operands[i])
             expression_builder_list.append(closing_parentheses[i] * ')')
