@@ -45,7 +45,7 @@ class Solution:
         operands = re.findall(r'\d+', expression)
         operators = re.findall(r'[\+\-\*]', expression)
 
-        # n-1 opening/closing parentheses lists, for n operands
+        # Generate list of lists of parentheses.
         opening_parentheses = [1, 1, 1, 0]
         closing_parentheses = [0, 0, 0, 3]
 
@@ -68,7 +68,8 @@ class Solution:
         expression_builder_list.append(operands[i])
         expression_builder_list.append(closing_parentheses[i] * ')')
 
-        expressions.append(''.join(expression_builder_list))
+        parenthesized_expression = ''.join(expression_builder_list)
+        expressions.append(eval(parenthesized_expression))
 
         return expressions
 
