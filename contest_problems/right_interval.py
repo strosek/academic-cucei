@@ -1,7 +1,7 @@
 #!/bin/python3
 """
 Class that implements solution to Leetcode Problem at:
-https://leetcode.com/problems/random-pick-index/
+https://leetcode.com/problems/find-right-interval/
 
 MIT License
 
@@ -37,8 +37,47 @@ class Interval:
         self.end = e
 
 class Solution:
-    def search_right(starts, end):
-        return 0
+    @staticmethod
+    def search_right(starts, start):
+        """
+        Implements binary search that returns right element if it exists.
+        :param starts: List of start-index.
+        :param start: End element of i-interval.
+        :return: Index of right interval.
+        """
+        print(starts)
+        print('Search {0}'.format(start))
+
+        found_index = -1
+        n_starts = len(starts)
+        index = (n_starts - 1) // 2
+        prev_index = index
+        while found_index == -1 and index < n_starts:
+            if starts[index][0] == start:
+                found_index = starts[index][1]
+                break
+            else:
+                if start < starts[index][0]:
+                    # Search left.
+                    prev_index = index
+                    index = index - index - index // 2
+                else:
+                    # Search right.
+                    prev_index = index
+                    index = index + index - index // 2
+
+                # If bisecting results in the same index, not found, break.
+                if prev_index == index:
+                    break
+
+        # If not found, pick the next element to the last index found.
+        if found_index == -1 and index < n_starts - 1:
+            print("Prev: {0}".format(prev_index))
+            found_index = prev_index + 1
+
+        print('Found: {0}'.format(found_index))
+
+        return found_index
 
     def findRightInterval(self, intervals):
         """
@@ -56,21 +95,17 @@ class Solution:
 
         right_intervals = []
         for interval in intervals:
-            # Search interval, if not found, add -1 to solutions
-            # If not found, but a valid start to the right exists, return the
-            # first index to the right.
-            #bin_search(starts, interval.search())
             right_intervals.append(self.search_right(starts, interval.end))
 
-        print(right_intervals)
+        print("Solution: {0}".format(right_intervals))
 
         return right_intervals
+
 
 def main():
     print('Solution ...')
     s = Solution()
-    s.findRightInterval([Interval(1, 2), Interval(2, 3), Interval(0,3)])
+    s.findRightInterval([Interval(1, 2), Interval(2, 3), Interval(0,3), Interval(3,4), Interval(5,9)])
 
 
 main()
-
